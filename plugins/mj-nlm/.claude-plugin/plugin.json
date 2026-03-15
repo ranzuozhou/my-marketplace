@@ -1,0 +1,12 @@
+{
+  "name": "mj-nlm",
+  "description": "MJ System NotebookLM 技能家族 - 提供 NLM 知识库的认证、创建、管理、查询和 Studio 制品生成能力",
+  "version": "1.0.0",
+  "author": {
+    "name": "ranzuozhou"
+  },
+  "repository": "https://github.com/ranzuozhou/mj-marketplace",
+  "license": "MIT",
+  "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio"],
+  "skills": "./skills/"
+}

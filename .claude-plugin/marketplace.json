@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mj-marketplace",
+  "owner": {
+    "name": "ranzuozhou",
+    "url": "https://github.com/ranzuozhou"
+  },
+  "metadata": {
+    "description": "MJ System 插件市场 — 提供数据处理、知识管理等 Claude Code 插件",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mj-nlm",
+      "source": "./plugins/mj-nlm",
+      "description": "NotebookLM 知识库完整操作能力：认证、创建、管理、查询、Studio 制品生成",
+      "version": "1.0.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "productivity",
+      "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio"],
+      "license": "MIT"
+    }
+  ]
+}
