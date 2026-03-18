@@ -1,13 +1,21 @@
 # Changelog
 
-鏍煎紡鍩轰簬 [Keep a Changelog](https://keepachangelog.com/zh-CN/)锛?
-鐗堟湰鍙烽伒寰?[璇箟鍖栫増鏈琞(https://semver.org/lang/zh-CN/)銆?
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
+版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-03-18
+
+### Added
+- 新增 mp-git 插件：Marketplace Git 工作流（9 skills）
+- 新增 mp-dev 插件：插件开发生命周期工具链（6 skills）
+- 项目文档体系：CLAUDE.md、docs/ 目录（6 篇指南/手册）
+- README.md 添加文档链接
 
 ## [1.0.0] - 2026-03-18
 
 ### Added
-- 鍒濆鍙戝竷锛? 涓?Plugin锛坢j-nlm锛夛紝5 涓?Skill锛坅uth, build, manage, query, studio锛?
-- Plugin Marketplace 鍏冩暟鎹粨鏋勶紙marketplace.json锛?
-- 浠撳簱鍩虹璁炬柦锛歏ERSION銆丆I/CD銆丳R 妯℃澘銆佸紑鍙戣€呰剼鏈?
+- 初始发布：1 个 Plugin（mj-nlm），5 个 Skill（auth, build, manage, query, studio）
+- Plugin Marketplace 元数据结构（marketplace.json）
+- 仓库基础设施：VERSION、CI/CD、PR 模板、开发者脚本
