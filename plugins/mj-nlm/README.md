@@ -29,14 +29,14 @@ MJ System NotebookLM 技能家族，提供 NLM 知识库的认证、创建、管
 ### 通过 Marketplace 安装（推荐）
 
 ```
-/plugin marketplace add ranzuozhou/mj-marketplace
-/plugin install mj-nlm@mj-marketplace
+/plugin marketplace add ranzuozhou/my-marketplace
+/plugin install mj-nlm@my-marketplace
 ```
 
 ### 本地开发安装
 
 ```bash
-claude --plugin-dir "D:\workspace\10-software-project\projects\mj-marketplace\plugins\mj-nlm"
+claude --plugin-dir "D:\workspace\10-software-project\projects\my-marketplace\plugins\mj-nlm"
 ```
 
 ## 验证安装

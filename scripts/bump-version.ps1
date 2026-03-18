@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    MJ Marketplace version bump script
+    My Marketplace version bump script
 
 .DESCRIPTION
     Batch-replace version numbers across project files.

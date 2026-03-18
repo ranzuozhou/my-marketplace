@@ -1,12 +1,12 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "mj-marketplace",
+  "name": "my-marketplace",
   "owner": {
     "name": "ranzuozhou",
     "url": "https://github.com/ranzuozhou"
   },
   "metadata": {
-    "description": "MJ System 插件市场 — 提供数据处理、知识管理等 Claude Code 插件",
+    "description": "个人插件市场 — 提供数据处理、知识管理等 Claude Code 插件",
     "version": "1.0.0"
   },
   "plugins": [

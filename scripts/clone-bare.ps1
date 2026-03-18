@@ -7,13 +7,13 @@
 #
 # Examples:
 #   # 鏂版垚鍛樺叆鑱岋紙鍏嬮殕 develop worktree锛?
-#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/mj-marketplace
+#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/my-marketplace
 #
 #   # 鍚屾椂鍒涘缓澶氫釜 worktree
-#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/mj-marketplace -Branches "develop,main"
+#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/my-marketplace -Branches "develop,main"
 #
 #   # 澧為噺娣诲姞鏂板垎鏀紙椤圭洰宸插瓨鍦ㄦ椂鑷姩璺宠繃鍒濆鍖栵級
-#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/mj-marketplace -Branches "feature/1-some-feature"
+#   powershell -ExecutionPolicy Bypass -File .\scripts\clone-bare.ps1 -RepoUrl https://github.com/ranzuozhou/my-marketplace -Branches "feature/1-some-feature"
 
 param(
     [Parameter(Mandatory=$true)]

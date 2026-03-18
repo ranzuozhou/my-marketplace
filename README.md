@@ -1,13 +1,13 @@
-# MJ Marketplace
+# My Marketplace
 
-MJ System 插件市场，为 Claude Code 提供数据处理、知识管理等专业插件。
+个人插件市场，为 Claude Code 提供数据处理、知识管理等专业插件。
 
 ## 安装 Marketplace
 
 在 Claude Code 中执行：
 
 ```
-/plugin marketplace add ranzuozhou/mj-marketplace
+/plugin marketplace add ranzuozhou/my-marketplace
 ```
 
 ## 可用插件
@@ -19,7 +19,7 @@ MJ System 插件市场，为 Claude Code 提供数据处理、知识管理等专
 ## 安装插件
 
 ```
-/plugin install mj-nlm@mj-marketplace
+/plugin install mj-nlm@my-marketplace
 ```
 
 安装后可用命令：
