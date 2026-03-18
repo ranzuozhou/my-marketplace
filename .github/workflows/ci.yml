@@ -1,0 +1,180 @@
+name: CI 鈥?Validate Plugin Structure
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+      - 'bugfix/*'
+      - 'documentation/*'
+      - 'maintain/*'
+      - 'hotfix/*'
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  validate:
+    name: Validate Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate plugin.json schema
+        run: |
+          ERRORS=0
+          for pj in plugins/*/.claude-plugin/plugin.json; do
+            PLUGIN_DIR=$(dirname "$(dirname "$pj")")
+            PLUGIN_NAME=$(basename "$PLUGIN_DIR")
+            for field in name description version author license skills; do
+              if ! grep -q "\"$field\"" "$pj"; then
+                echo "ERROR: $pj missing required field: $field"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+            echo "OK: $PLUGIN_NAME plugin.json"
+          done
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "All plugin.json files valid"
+
+      - name: Validate marketplace.json
+        run: |
+          ERRORS=0
+          MJ="$(cat .claude-plugin/marketplace.json)"
+
+          for field in name owner metadata plugins; do
+            if ! echo "$MJ" | grep -q "\"$field\""; then
+              echo "ERROR: marketplace.json missing field: $field"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          PLUGIN_NAMES=$(python3 -c "
+          import json
+          with open('.claude-plugin/marketplace.json') as f:
+              data = json.load(f)
+          for p in data['plugins']:
+              print(p['name'])
+          ")
+          for name in $PLUGIN_NAMES; do
+            if [ ! -d "plugins/$name" ]; then
+              echo "ERROR: marketplace.json references plugin '$name' but directory plugins/$name not found"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "marketplace.json valid"
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          ERRORS=0
+          for skill_dir in plugins/*/skills/*/; do
+            DIR_NAME=$(basename "$skill_dir")
+            if echo "$DIR_NAME" | grep -q "\-shared$"; then
+              echo "SKIP: $skill_dir (shared resource, not a skill)"
+              continue
+            fi
+
+            SKILL_FILE="${skill_dir}SKILL.md"
+            if [ ! -f "$SKILL_FILE" ]; then
+              echo "ERROR: $skill_dir missing SKILL.md"
+              ERRORS=$((ERRORS + 1))
+              continue
+            fi
+
+            for field in name description; do
+              if ! head -20 "$SKILL_FILE" | grep -q "^${field}:"; then
+                echo "ERROR: $SKILL_FILE missing frontmatter field: $field"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+          done
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "All SKILL.md files valid"
+
+      - name: Validate directory structure
+        run: |
+          ERRORS=0
+          for plugin_dir in plugins/*/; do
+            PLUGIN_NAME=$(basename "$plugin_dir")
+            REQUIRED_FILES=(".claude-plugin/plugin.json" "CLAUDE.md" "README.md")
+            REQUIRED_DIRS=("skills")
+
+            for f in "${REQUIRED_FILES[@]}"; do
+              if [ ! -f "${plugin_dir}${f}" ]; then
+                echo "ERROR: plugins/$PLUGIN_NAME missing required file: $f"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+
+            for d in "${REQUIRED_DIRS[@]}"; do
+              if [ ! -d "${plugin_dir}${d}" ]; then
+                echo "ERROR: plugins/$PLUGIN_NAME missing required directory: $d"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+          done
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "All plugin directory structures valid"
+
+      - name: Validate version consistency
+        run: |
+          ERRORS=0
+
+          FILE_VERSION=$(cat VERSION | tr -d '[:space:]')
+          MJ_VERSION=$(python3 -c "
+          import json
+          with open('.claude-plugin/marketplace.json') as f:
+              data = json.load(f)
+          print(data['metadata']['version'])
+          ")
+          if [ "$FILE_VERSION" != "$MJ_VERSION" ]; then
+            echo "ERROR: VERSION ($FILE_VERSION) != marketplace.json metadata.version ($MJ_VERSION)"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          for pj in plugins/*/.claude-plugin/plugin.json; do
+            PLUGIN_DIR=$(dirname "$(dirname "$pj")")
+            PLUGIN_NAME=$(basename "$PLUGIN_DIR")
+            PJ_VERSION=$(python3 -c "
+          import json
+          with open('$pj') as f:
+              data = json.load(f)
+          print(data['version'])
+          ")
+            MJ_PJ_VERSION=$(python3 -c "
+          import json
+          with open('.claude-plugin/marketplace.json') as f:
+              data = json.load(f)
+          for p in data['plugins']:
+              if p['name'] == '$PLUGIN_NAME':
+                  print(p['version'])
+                  break
+          ")
+            if [ "$PJ_VERSION" != "$MJ_PJ_VERSION" ]; then
+              echo "ERROR: $PLUGIN_NAME plugin.json ($PJ_VERSION) != marketplace.json ($MJ_PJ_VERSION)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "All versions consistent"
+
+      - name: Validate CHANGELOG presence
+        run: |
+          ERRORS=0
+
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "ERROR: Root CHANGELOG.md not found"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          for plugin_dir in plugins/*/; do
+            PLUGIN_NAME=$(basename "$plugin_dir")
+            if [ ! -f "${plugin_dir}CHANGELOG.md" ]; then
+              echo "ERROR: plugins/$PLUGIN_NAME/CHANGELOG.md not found"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          [ $ERRORS -gt 0 ] && exit 1
+          echo "All CHANGELOGs present"
