@@ -37,6 +37,10 @@
 - **mj-nlm** 需要：NotebookLM MCP CLI (`uv tool install notebooklm-mcp-cli --with socksio --force`) + Google 认证 (`nlm login`)
 - **mp-git** 需要：`GITHUB_PERSONAL_ACCESS_TOKEN` 系统环境变量
 
+## 文档
+
+完整文档索引：[docs/INDEX.md](docs/INDEX.md)
+
 ## 许可
 
 MIT License
