@@ -4,9 +4,11 @@
 
 .DESCRIPTION
     Batch-replace version numbers across project files.
-    Supports two scopes:
+    Supports multiple scopes:
       - marketplace: updates VERSION, marketplace.json (metadata.version)
       - mj-nlm:     updates plugin.json (version), marketplace.json (plugins[name].version)
+      - mp-git:     updates plugin.json (version), marketplace.json (plugins[name].version)
+      - mp-dev:     updates plugin.json (version), marketplace.json (plugins[name].version)
 
 .PARAMETER From
     Current version (e.g. "1.0.0")
@@ -15,7 +17,7 @@
     Target version (e.g. "1.1.0")
 
 .PARAMETER Scope
-    Target scope: "marketplace" (default), or "mj-nlm"
+    Target scope: "marketplace" (default), "mj-nlm", "mp-git", or "mp-dev"
 
 .PARAMETER DryRun
     Preview mode: show what would change without modifying files
@@ -25,6 +27,8 @@
     .\scripts\bump-version.ps1 -From "1.0.0" -To "1.1.0"
     .\scripts\bump-version.ps1 -From "1.0.0" -To "1.1.0" -Scope "mj-nlm" -DryRun
     .\scripts\bump-version.ps1 -From "1.0.0" -To "1.1.0" -Scope "mj-nlm"
+    .\scripts\bump-version.ps1 -From "1.0.0" -To "1.1.0" -Scope "mp-git" -DryRun
+    .\scripts\bump-version.ps1 -From "1.0.0" -To "1.1.0" -Scope "mp-dev"
 #>
 
 param(
@@ -35,7 +39,7 @@ param(
     [string]$To,
 
     [Parameter(Mandatory = $false)]
-    [ValidateSet("marketplace", "mj-nlm")]
+    [ValidateSet("marketplace", "mj-nlm", "mp-git", "mp-dev")]
     [string]$Scope = "marketplace",
 
     [switch]$DryRun

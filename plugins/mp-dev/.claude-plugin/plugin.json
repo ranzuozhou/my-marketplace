@@ -1,0 +1,10 @@
+{
+  "name": "mp-dev",
+  "description": "插件开发生命周期技能家族 — 提供脚手架、SKILL.md 编写、结构校验、测试工作流、CHANGELOG 管理和发布能力",
+  "version": "1.0.0",
+  "author": { "name": "ranzuozhou" },
+  "repository": "https://github.com/ranzuozhou/my-marketplace",
+  "license": "MIT",
+  "keywords": ["plugin", "development", "testing", "release", "skill"],
+  "skills": "./skills/"
+}

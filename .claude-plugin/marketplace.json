@@ -6,7 +6,7 @@
     "url": "https://github.com/ranzuozhou"
   },
   "metadata": {
-    "description": "个人插件市场 — 提供数据处理、知识管理等 Claude Code 插件",
+    "description": "个人插件市场 — 提供知识管理、Git 工作流、插件开发等 Claude Code 插件",
     "version": "1.0.0"
   },
   "plugins": [
@@ -18,6 +18,26 @@
       "author": { "name": "ranzuozhou" },
       "category": "productivity",
       "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio"],
+      "license": "MIT"
+    },
+    {
+      "name": "mp-git",
+      "source": "./plugins/mp-git",
+      "description": "Marketplace Git 工作流技能家族 — 提供适配插件仓库的分支、提交、推送、PR、Review、同步和清理能力",
+      "version": "1.0.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "development",
+      "keywords": ["git", "github", "marketplace", "plugin-development"],
+      "license": "MIT"
+    },
+    {
+      "name": "mp-dev",
+      "source": "./plugins/mp-dev",
+      "description": "插件开发生命周期技能家族 — 提供脚手架、SKILL.md 编写、结构校验、测试工作流、CHANGELOG 管理和发布能力",
+      "version": "1.0.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "development",
+      "keywords": ["plugin", "development", "testing", "release", "skill"],
       "license": "MIT"
     }
   ]
