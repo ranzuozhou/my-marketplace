@@ -1,12 +1,12 @@
 # My Marketplace
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![CI](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml)
 
 个人 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 插件市场 — 集中管理和分发知识管理、Git 工作流、插件开发等领域的自动化技能。
 
-3 个插件，20 个技能，覆盖从知识库操作到插件发布的完整开发工作流。
+4 个插件，23 个技能，覆盖从知识库操作到插件发布的完整开发工作流。
 
 ## 插件目录
 
@@ -15,6 +15,7 @@
 | [**mj-nlm**](plugins/mj-nlm/README.md) | NotebookLM 知识库：认证、创建、管理、查询、Studio 制品 | 5 | 1.0.0 | NotebookLM MCP CLI + Google 认证 |
 | [**mp-git**](plugins/mp-git/README.md) | Git 工作流：分支、提交、推送、PR、Review、同步、清理 | 9 | 1.0.0 | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 | [**mp-dev**](plugins/mp-dev/README.md) | 插件开发：脚手架、SKILL 编写、校验、测试、CHANGELOG、发布 | 6 | 1.0.0 | — |
+| [**flora-ptm**](plugins/flora-ptm/README.md) | 研究报告分析与多媒体转化：导入消化、综述分库、媒体制作 | 3 | 1.0.0 | NotebookLM MCP CLI + Google 认证 |
 
 ## 安装
 
@@ -42,6 +43,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mj-nlm@my-marketplace
 /plugin install mp-git@my-marketplace
 /plugin install mp-dev@my-marketplace
+/plugin install flora-ptm@my-marketplace
 ```
 
 #### 项目级安装（提交到 git，团队共享）
@@ -50,6 +52,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mj-nlm@my-marketplace --scope project
 /plugin install mp-git@my-marketplace --scope project
 /plugin install mp-dev@my-marketplace --scope project
+/plugin install flora-ptm@my-marketplace --scope project
 ```
 
 #### 本地级安装（gitignore，仅本人本项目）
@@ -58,6 +61,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mj-nlm@my-marketplace --scope local
 /plugin install mp-git@my-marketplace --scope local
 /plugin install mp-dev@my-marketplace --scope local
+/plugin install flora-ptm@my-marketplace --scope local
 ```
 
 ### 3. 使用示例
@@ -69,6 +73,7 @@ Claude Code 插件支持三种安装级别：
 /mp-git:mp-git-branch          # 按规范创建新分支
 /mp-git:mp-git-commit          # 暂存并提交代码
 /mp-dev:mp-dev-scaffold        # 脚手架生成新插件
+/flora-ptm:digest              # 批量导入分析研究报告
 ```
 
 ## 更新
