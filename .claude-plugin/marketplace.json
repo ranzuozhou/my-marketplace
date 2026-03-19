@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "个人插件市场 — 提供知识管理、Git 工作流、插件开发等 Claude Code 插件",
-    "version": "1.1.1"
+    "version": "1.2.0"
   },
   "plugins": [
     {
@@ -38,6 +38,16 @@
       "author": { "name": "ranzuozhou" },
       "category": "development",
       "keywords": ["plugin", "development", "testing", "release", "skill"],
+      "license": "MIT"
+    },
+    {
+      "name": "flora-ptm",
+      "source": "./plugins/flora-ptm",
+      "description": "研究报告批量分析与多媒体转化 — 利用 NotebookLM 将多份研究报告整理为音频、视频、幻灯片等多媒体学习材料",
+      "version": "1.0.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "productivity",
+      "keywords": ["notebooklm", "research", "literature-review", "multimedia", "paper-to-media", "deep-research"],
       "license": "MIT"
     }
   ]

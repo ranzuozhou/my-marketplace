@@ -1,0 +1,12 @@
+{
+  "name": "flora-ptm",
+  "description": "Flora Paper-to-Media — 研究报告批量分析与多媒体转化插件，利用 NotebookLM 将多份研究报告整理为易于吸收的音频、视频、幻灯片等多媒体材料",
+  "version": "1.0.0",
+  "author": {
+    "name": "ranzuozhou"
+  },
+  "repository": "https://github.com/ranzuozhou/my-marketplace",
+  "license": "MIT",
+  "keywords": ["notebooklm", "research", "literature-review", "multimedia", "paper-to-media", "deep-research"],
+  "skills": "./skills/"
+}
