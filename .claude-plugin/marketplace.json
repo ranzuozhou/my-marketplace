@@ -39,6 +39,16 @@
       "category": "development",
       "keywords": ["plugin", "development", "testing", "release", "skill"],
       "license": "MIT"
+    },
+    {
+      "name": "flora-ptm",
+      "source": "./plugins/flora-ptm",
+      "description": "研究报告批量分析与多媒体转化 — 利用 NotebookLM 将多份研究报告整理为音频、视频、幻灯片等多媒体学习材料",
+      "version": "1.0.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "productivity",
+      "keywords": ["notebooklm", "research", "literature-review", "multimedia", "paper-to-media", "deep-research"],
+      "license": "MIT"
     }
   ]
 }

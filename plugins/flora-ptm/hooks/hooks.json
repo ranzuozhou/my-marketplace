@@ -1,0 +1,12 @@
+{
+  "description": "Flora PTM workflow detection on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "prompt",
+        "prompt": "Check if there are any in-progress Flora PTM workflows by looking for notebooks with tag 'flora' and tag 'staging' using tag(action='select', query='flora,staging'). If found, briefly inform the user that there are in-progress flora workflows and suggest they can continue with /flora-ptm:synthesize or /flora-ptm:produce, or start a new workflow with /flora-ptm:digest. Keep the message concise (2-3 sentences). If no flora notebooks found, say nothing.",
+        "timeout": 30
+      }
+    ]
+  }
+}
