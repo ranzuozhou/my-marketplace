@@ -5,6 +5,12 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-20
+
+### Added
+- 新增 flora-ptm 插件：研究报告批量分析与多媒体转化（3 skills: digest, synthesize, produce）
+- 项目级 Claude Code settings（permissions + enabledPlugins）
+
 ## [1.1.1] - 2026-03-18
 
 ### Changed
