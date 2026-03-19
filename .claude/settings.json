@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(powershell:*)",
+      "Bash(pwsh:*)",
+      "Bash(gh:*)"
+    ],
+    "deny": []
+  },
+  "enabledPlugins": {
+    "mp-dev@my-marketplace": true,
+    "mp-git@my-marketplace": true
+  }
+}
