@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-24
+
 ### Added
 - 新增 `mp-git-release` 技能：7 步交互式版本发布工作流（bump 版本、更新 CHANGELOG、创建 Release PR）
 

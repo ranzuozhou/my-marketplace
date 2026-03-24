@@ -55,13 +55,15 @@ $ProjectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Pa
 if ($Scope -eq "marketplace") {
     $TargetFiles = @(
         "VERSION",
-        ".claude-plugin/marketplace.json"
+        ".claude-plugin/marketplace.json",
+        "README.md"
     )
     $MarketplaceJsonMode = "metadata"
 } else {
     $TargetFiles = @(
         "plugins/$Scope/.claude-plugin/plugin.json",
-        ".claude-plugin/marketplace.json"
+        ".claude-plugin/marketplace.json",
+        "README.md"
     )
     $MarketplaceJsonMode = "plugin:$Scope"
 }

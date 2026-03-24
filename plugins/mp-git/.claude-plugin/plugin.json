@@ -1,7 +1,7 @@
 {
   "name": "mp-git",
   "description": "Marketplace Git 工作流技能家族 — 提供适配个人插件仓库的分支、提交、推送、PR、Review、同步和清理能力",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "ranzuozhou"
   },
