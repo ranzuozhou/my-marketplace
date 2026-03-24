@@ -5,6 +5,18 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-24
+
+### Added
+- mp-git: 新增 `mp-git-release` 技能 — 7 步交互式版本发布工作流
+- mp-git: 新增 SPEC 设计文档 `docs/design/mp-git/[SPEC]_MP_Git_Release_Skill.md`
+
+### Fixed
+- `bump-version.ps1` plugin scope 补充 README.md 到目标文件列表
+
+### Changed
+- README.md 插件版本表更新
+
 ## [1.2.0] - 2026-03-20
 
 ### Added

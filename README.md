@@ -1,6 +1,6 @@
 # My Marketplace
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![CI](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml)
 
@@ -13,7 +13,7 @@
 | Plugin | 描述 | Skills | Version | 前置条件 |
 |--------|------|--------|---------|----------|
 | [**mj-nlm**](plugins/mj-nlm/README.md) | NotebookLM 知识库：认证、创建、管理、查询、Studio 制品 | 5 | 1.0.0 | NotebookLM MCP CLI + Google 认证 |
-| [**mp-git**](plugins/mp-git/README.md) | Git 工作流：分支、提交、推送、PR、Review、同步、清理 | 9 | 1.0.0 | `GITHUB_PERSONAL_ACCESS_TOKEN` |
+| [**mp-git**](plugins/mp-git/README.md) | Git 工作流：分支、提交、推送、PR、Review、同步、清理 | 10 | 1.1.0 | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 | [**mp-dev**](plugins/mp-dev/README.md) | 插件开发：脚手架、SKILL 编写、校验、测试、CHANGELOG、发布 | 6 | 1.0.0 | — |
 | [**flora-ptm**](plugins/flora-ptm/README.md) | 研究报告分析与多媒体转化：导入消化、综述分库、媒体制作 | 3 | 1.0.0 | NotebookLM MCP CLI + Google 认证 |
 
