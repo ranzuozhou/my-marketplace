@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `.github/PULL_REQUEST_TEMPLATE/*.md` 编码修复:6 个 PR 模板(feature / bugfix / documentation / maintain / hotfix / release)原为 GBK 双编码产生的 mojibake,已重写为正确 UTF-8 中文内容
+
 ## [1.4.0] - 2026-04-20
 
 ### Added
