@@ -49,6 +49,16 @@
       "category": "productivity",
       "keywords": ["notebooklm", "research", "literature-review", "multimedia", "paper-to-media", "deep-research"],
       "license": "MIT"
+    },
+    {
+      "name": "mj-drawio",
+      "source": "./plugins/mj-drawio",
+      "description": "draw.io 图表生成与导出(Windows 专用)— 3 个 skill(create/export/template),内置 mj-system DDD 六层 / 数仓分层 / ETL 流程 / ER 图模板",
+      "version": "0.1.0",
+      "author": { "name": "ranzuozhou" },
+      "category": "documentation",
+      "keywords": ["drawio", "diagram", "architecture", "mj-system", "ddd", "etl", "windows"],
+      "license": "MIT"
     }
   ]
 }
