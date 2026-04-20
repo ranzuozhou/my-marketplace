@@ -1,0 +1,50 @@
+{
+  "skill_name": "mj-drawio-create",
+  "description": "skill-creator iteration loop 用的测试集。每个 prompt 配对可程序化校验的 assertion,验证 XML 结构规范、节点数、配色使用。",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ddd-six-layer-full",
+      "prompt": "画一张 mj-system 的 DDD 六层架构图,每层放 2-3 个代表模块",
+      "expected_output": "合法 .drawio + 6 层配色正确 + 层间 edge",
+      "assertions": [
+        "file exists and ends with .drawio",
+        "python validate-xml.py returns exit code 0",
+        "mxCell 数量 >= 15",
+        "含 DDD 六色 fillColor: #D4E1F5, #D5E8D4, #FFE6CC, #F8CECC, #E1D5E7, #DAE8FC 各至少一次",
+        "至少 5 条 edge 含 <mxGeometry relative='1' as='geometry'/>",
+        "含 Interface/Application/Domain/Infrastructure/Shared/Config 六个层名"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "simple-three-node-flow",
+      "prompt": "画一个三节点流程图 A→B→C",
+      "expected_output": "3 个矩形 + 2 条有向边",
+      "assertions": [
+        "python validate-xml.py returns exit code 0",
+        "mxCell edge='1' 的数量 == 2",
+        "所有 edge 的 source/target 都对应已定义的 cell id",
+        "XML 不含未转义的 & 、< 、>(排除标签本身)",
+        "root cells id=0 和 id=1 都存在"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "etl-flow-with-lock",
+      "prompt": "画一张 ETL 流程图:源表 ods.orders 经过函数 dwd.clean_orders 写到 dwd.orders,标出 Advisory Lock",
+      "expected_output": "ETL 三节点 + Advisory Lock 标记",
+      "assertions": [
+        "python validate-xml.py returns exit code 0",
+        "value 属性含 'ods.orders'、'dwd.clean_orders'、'dwd.orders' 各一次",
+        "含 shape=process 形状(PL/pgSQL 函数节点)",
+        "含浅黄函数节点 fillColor #FFF2CC",
+        "含 'advisory_lock' 或 '🔒' 关键字",
+        "至少 2 条 edge 含 <mxGeometry>"
+      ],
+      "files": []
+    }
+  ]
+}

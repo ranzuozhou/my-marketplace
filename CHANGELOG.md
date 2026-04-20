@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Added
+- 新增插件: mj-drawio v0.1.0 — draw.io 图表生成与 mj-system 模板(Windows 专用),3 个 skill(create / export / template)+ 4 个预置模板 + XML 预校验脚本
+
 ## [1.3.0] - 2026-03-24
 
 ### Added
