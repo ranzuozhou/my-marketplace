@@ -1,12 +1,12 @@
 # My Marketplace
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![CI](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml)
 
 个人 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 插件市场 — 集中管理和分发知识管理、Git 工作流、插件开发等领域的自动化技能。
 
-4 个插件，23 个技能，覆盖从知识库操作到插件发布的完整开发工作流。
+5 个插件，27 个技能，覆盖从知识库操作到插件发布的完整开发工作流。
 
 ## 插件目录
 

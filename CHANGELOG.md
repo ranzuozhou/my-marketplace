@@ -5,6 +5,15 @@
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-04-21
+
+### Added
+- `.github/ISSUE_TEMPLATE/` 目录补齐:5 个 issue 模板(feature / bugfix / documentation / maintain / hotfix)+ `config.yml`(禁用空白 issue、Discussions 入口)。此前 `mp-git-issue` skill 声明读取这些模板但目录不存在
+
+### Fixed
+- `.github/PULL_REQUEST_TEMPLATE/*.md` 编码修复:6 个 PR 模板(feature / bugfix / documentation / maintain / hotfix / release)原为 GBK 双编码产生的 mojibake,已重写为正确 UTF-8 中文内容
+- 根 README.md 插件数量/技能数量描述从 "4 个插件,23 个技能" 更正为 "5 个插件,27 个技能"(反映 v1.4.0 新增的 mj-drawio)
+
 ## [1.4.0] - 2026-04-20
 
 ### Added
