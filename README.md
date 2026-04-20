@@ -1,6 +1,6 @@
 # My Marketplace
 
-![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![CI](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/ranzuozhou/my-marketplace/actions/workflows/ci.yml)
 
@@ -16,6 +16,7 @@
 | [**mp-git**](plugins/mp-git/README.md) | Git 工作流：分支、提交、推送、PR、Review、同步、清理 | 10 | 1.1.0 | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 | [**mp-dev**](plugins/mp-dev/README.md) | 插件开发：脚手架、SKILL 编写、校验、测试、CHANGELOG、发布 | 6 | 1.0.0 | — |
 | [**flora-ptm**](plugins/flora-ptm/README.md) | 研究报告分析与多媒体转化：导入消化、综述分库、媒体制作 | 3 | 1.0.0 | NotebookLM MCP CLI + Google 认证 |
+| [**mj-drawio**](plugins/mj-drawio/README.md) | draw.io 图表生成与导出:create / export / template,内置 mj-system DDD/数仓/ETL 模板 | 3 | 0.1.0 | draw.io Desktop + Python 3.8+(Windows 专用) |
 
 ## 安装
 
@@ -44,6 +45,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mp-git@my-marketplace
 /plugin install mp-dev@my-marketplace
 /plugin install flora-ptm@my-marketplace
+/plugin install mj-drawio@my-marketplace
 ```
 
 #### 项目级安装（提交到 git，团队共享）
@@ -53,6 +55,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mp-git@my-marketplace --scope project
 /plugin install mp-dev@my-marketplace --scope project
 /plugin install flora-ptm@my-marketplace --scope project
+/plugin install mj-drawio@my-marketplace --scope project
 ```
 
 #### 本地级安装（gitignore，仅本人本项目）
@@ -62,6 +65,7 @@ Claude Code 插件支持三种安装级别：
 /plugin install mp-git@my-marketplace --scope local
 /plugin install mp-dev@my-marketplace --scope local
 /plugin install flora-ptm@my-marketplace --scope local
+/plugin install mj-drawio@my-marketplace --scope local
 ```
 
 ### 3. 使用示例
