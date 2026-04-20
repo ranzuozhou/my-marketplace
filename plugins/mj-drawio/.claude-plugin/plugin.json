@@ -1,0 +1,10 @@
+{
+  "name": "mj-drawio",
+  "description": "draw.io 图表生成与导出工具集 — 3 个 skill(create/export/template),内置 mj-system DDD 六层 / ODS-DWD-DWS 数仓分层 / ETL 流程 / ER 图模板。Windows 10/11 桌面环境专用。",
+  "version": "0.1.0",
+  "author": { "name": "ranzuozhou" },
+  "repository": "https://github.com/ranzuozhou/my-marketplace",
+  "license": "MIT",
+  "keywords": ["drawio", "diagram", "architecture", "mj-system", "ddd", "etl", "windows"],
+  "skills": "./skills/"
+}
