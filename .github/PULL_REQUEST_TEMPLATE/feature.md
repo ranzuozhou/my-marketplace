@@ -1,20 +1,20 @@
-## 鍙樻洿鎽樿
-<!-- 绠€杩版湰娆″彉鏇寸殑鍐呭鍜岀洰鐨?-->
+## 变更摘要
+<!-- 简述本次变更的内容和目的 -->
 
-## 鍏宠仈 Issue
+## 关联 Issue
 Closes #
 
-## 褰卞搷鑼冨洿
-<!-- 鍙楀奖鍝嶇殑 Plugin / Skill / 鍩虹璁炬柦 -->
+## 影响范围
+<!-- 受影响的 Plugin / Skill / 基础设施 -->
 
-## 瀹℃牳瑕佺偣
-<!-- 鎻愮ず Reviewer 閲嶇偣鍏虫敞鐨勫唴瀹?-->
+## 审核要点
+<!-- 提示 Reviewer 重点关注的内容 -->
 
-## 鑷缁撴灉
-- [ ] plugin.json 瀛楁瀹屾暣锛坣ame, description, version, author, license, skills锛?
-- [ ] SKILL.md frontmatter 鏈夋晥锛坣ame, description锛?
-- [ ] 鏃犳畫鐣欒皟璇曚唬鐮?
-- [ ] Commit message 绗﹀悎 `<type>(<scope>): <summary>` 瑙勮寖
-- [ ] CHANGELOG.md `[Unreleased]` 鍖哄潡宸叉洿鏂?
+## 自检结果
+- [ ] plugin.json 字段完整（name, description, version, author, license, skills）
+- [ ] SKILL.md frontmatter 有效（name, description）
+- [ ] 无残留调试代码
+- [ ] Commit message 符合 `<type>(<scope>): <summary>` 规范
+- [ ] CHANGELOG.md `[Unreleased]` 区块已更新
 
-> **鍏佽鐨?commit types**: `feat`, `perf`, `refactor`, `test`, `docs`
+> **允许的 commit types**: `feat`, `perf`, `refactor`, `test`, `docs`

@@ -1,19 +1,22 @@
-## Bug 鎻忚堪
-<!-- 涓€鍙ヨ瘽鎻忚堪鐢ㄦ埛鐪嬪埌鐨勯棶棰?-->
+## Bug 描述
+<!-- 一句话描述用户看到的问题 -->
 
-## 鏍瑰洜鍒嗘瀽
-<!-- 闂鐨勬牴鏈師鍥狅紙涓嶆槸鐥囩姸锛?-->
+## 关联 Issue
+Closes #
 
-## 淇鏂规
-<!-- 鏈鍙樻洿鍋氫簡浠€涔堛€佸浣曚慨澶?-->
+## 根因分析
+<!-- 问题的根本原因（不是症状） -->
 
-## 褰卞搷鑼冨洿
-<!-- 鍙楀奖鍝嶇殑 Plugin / Skill -->
+## 修复方案
+<!-- 本次变更做了什么、如何修复 -->
 
-## 鑷缁撴灉
-- [ ] plugin.json 瀛楁瀹屾暣
-- [ ] 鏃犳畫鐣欒皟璇曚唬鐮?
-- [ ] Commit message 绗﹀悎 `<type>(<scope>): <summary>` 瑙勮寖
-- [ ] CHANGELOG.md `[Unreleased]` 鍖哄潡宸叉洿鏂?
+## 影响范围
+<!-- 受影响的 Plugin / Skill -->
 
-> **鍏佽鐨?commit types**: `fix`, `test`, `docs`
+## 自检结果
+- [ ] plugin.json 字段完整
+- [ ] 无残留调试代码
+- [ ] Commit message 符合 `<type>(<scope>): <summary>` 规范
+- [ ] CHANGELOG.md `[Unreleased]` 区块已更新
+
+> **允许的 commit types**: `fix`, `test`, `docs`

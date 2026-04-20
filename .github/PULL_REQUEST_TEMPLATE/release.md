@@ -1,17 +1,27 @@
-## Release 鏍囬
-<!-- 鏍煎紡: Release vX.Y.Z 鈥?<涓婚> -->
+## Release 标题
+<!-- 格式: Release vX.Y.Z — <主题> -->
 
 ## Highlights
-<!-- 浠?CHANGELOG.md [Unreleased] 鎻愬彇鐨勬牳蹇冨彉鏇?-->
+<!-- 从 CHANGELOG.md [Unreleased] 提取的核心变更 -->
 
-## 瀹℃牳瑕佺偣
-- [ ] CHANGELOG.md 瀹屾暣鎬э紙`[Unreleased]` 宸茶浆涓烘寮忕増鏈妭锛?
-- [ ] VERSION 鏂囦欢涓?marketplace.json 鐗堟湰涓€鑷?
-- [ ] 鍚?plugin.json 鐗堟湰鍙蜂笌 marketplace.json plugins 鏁扮粍涓€鑷?
-- [ ] 鏃犳畫鐣欒皟璇曚唬鐮?
-- [ ] 鏃犳湭鍏抽棴鐨勯樆濉炴€?Issue
+### Versions
+| Plugin | Version |
+|--------|---------|
+| marketplace | x.y.z |
+| mj-nlm | x.y.z |
+| mp-git | x.y.z |
+| mp-dev | x.y.z |
+| flora-ptm | x.y.z |
+| mj-drawio | x.y.z |
+
+## 审核要点
+- [ ] CHANGELOG.md 完整性（`[Unreleased]` 已转为正式版本节）
+- [ ] VERSION 文件与 marketplace.json 版本一致
+- [ ] 各 plugin.json 版本号与 marketplace.json plugins 数组一致
+- [ ] 无残留调试代码
+- [ ] 无未关闭的阻塞性 Issue
 
 ## Details
-璇︾粏鍙樻洿璇峰弬闃?[CHANGELOG.md](../../CHANGELOG.md)
+详细变更请参阅 [CHANGELOG.md](../../CHANGELOG.md)
 
-> **Version bump 鍓嶇疆**锛氬彂甯冨墠闇€鎵ц `scripts/bump-version.ps1`
+> **Version bump 前置**：发布前需执行 `scripts/bump-version.ps1`
