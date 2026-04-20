@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 插件使用问题 / 咨询
+    url: https://github.com/ranzuozhou/my-marketplace/discussions
+    about: 使用问题、咨询、功能讨论请用 Discussions,Issues 保留给明确的 bug / feature / maintain 工单。
