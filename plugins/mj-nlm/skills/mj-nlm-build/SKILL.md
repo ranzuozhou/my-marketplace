@@ -39,7 +39,7 @@ v2 升级要点（相比 v1）：
 | 已知信息 | 行动 |
 |---|---|
 | "创建知识库"但未说明范围 | Phase 0 → H2 追问 |
-| 指定了具体服务（如"DQV"或"EmailAgent"） | 推断 project + scope，Phase 0 |
+| 指定了具体服务（如"DQV"）或 mj-agent 模块（如"sql-introspect"、"system prompt"） | 推断 project + scope，Phase 0 |
 | 指定了 mj-agent 项目 | project=agent，参考 naming-reference.md 选 scope |
 | 已有 notebook，需追加 source | Phase 0 → 跳 Phase 1 → Phase 2 |
 | 已有 notebook，需补领域定向报告 | Phase 0 → 跳到 Phase 7 |
@@ -135,7 +135,7 @@ digraph nlm_build {
 |---|---|---|
 | `project` | 项目域 | `system` / `agent` / `multi` / `intel` |
 | `scope` | 范围类型 | 按 project 取对应集合（详见 `→ ../mj-nlm-shared/naming-reference.md`） |
-| `topic` | 主题名 | kebab-case，如 `DQV`、`collection-pipeline`、`EmailAgent`、`langgraph-orchestration` |
+| `topic` | 主题名 | kebab-case，如 `DQV`、`collection-pipeline`、`mj_agent`、`sql-introspect`、`system-prompt`、`adr-suite` |
 | `purpose` | 用途（可选） | 如 `培训`、`架构评审`、`知识沉淀`、`学习`（v2） |
 
 信息不足 → 触发 **H2**（AskUserQuestion 收集范围信息）。
@@ -143,9 +143,12 @@ digraph nlm_build {
 **Notebook 命名**：`MJ-{project}-{scope}-{topic}-{YYYYMMDD}`
 
 **示例**：
-- `MJ-system-mod-DQV-20260505`
-- `MJ-agent-agent-EmailAgent-20260505`
-- `MJ-multi-cross-architecture-20260505`
+- `MJ-system-mod-DQV-20260506`
+- `MJ-agent-code-mj_agent-20260506`
+- `MJ-agent-tool-sql-introspect-20260506`
+- `MJ-agent-skill-sql-explorer-20260506`
+- `MJ-agent-docs-dual-track-framework-20260506`
+- `MJ-multi-cross-architecture-20260506`
 
 **重名检查**：`notebook_list()` 查重 → 重名触发 **H3**（复用已有 / 改名 / 删除重建）
 
@@ -159,13 +162,15 @@ digraph nlm_build {
 | `system` | `pipe` | `src/` 涉及模块 + `sql/` 相关 + `docs/design/` 多服务 |
 | `system` | `layer` | `sql/{层号}-{域}/` + `docs/infrastructure/database/` |
 | `system` | `cross` | `docs/` + `CLAUDE.md` + `components/` + `.claude/skills/` |
-| `agent` | `agent` | `agents/{AgentName}/` + `docs/agents/{AgentName}/` (占位符) |
-| `agent` | `tool` | `tools/{ToolName}/` + `mcp/{ToolName}/` (占位符) |
-| `agent` | `workflow` | `workflows/{WorkflowName}/` 或 `langgraph/{WorkflowName}/` (占位符) |
-| `agent` | `cross` | `docs/` + `prompts/shared/` + `agents/_base/` (占位符) |
+| `agent` | `code` | `src/mj_agent/` 整包 + `langgraph.json` + `pyproject.toml` |
+| `agent` | `tool` | `src/mj_agent/tools/{ToolName}/` + `tools/__init__.py` ALL_TOOLS 注册 |
+| `agent` | `skill` | `src/mj_agent/skills/{SkillName}/SKILL.md` + 关联 EVAL / PROMPT |
+| `agent` | `prompt` | `src/mj_agent/prompts/system.md` + 其他 prompt 文件 |
+| `agent` | `docs` | `docs/{adr,rule,infrastructure,assessments}/`（按聚焦点取子集） |
+| `agent` | `cross` | `CLAUDE.md` + `pyproject.toml` + `langgraph.json` + `plans/` + `.env.example` |
 | `multi` | `cross` | mj-system + mj-agent 双 docs/ + `docs/cross/` |
 
-> mj-agent 路径在 `naming-reference.md` 中明确标注为占位符，待真实目录确认后修正。
+> mj-agent 是单 agent 单包项目（LangChain 1.x + LangGraph 1.1.8），扫描映射依据 mj-agent develop 实际目录定稿；详见 `→ ../mj-nlm-shared/naming-reference.md#project=agent`。
 
 > scope 边界模糊时（如"DQV 的数据库部分"），优先按主要目的选择，并在 Phase 2 材料清单确认时让用户调整。
 
@@ -252,7 +257,7 @@ digraph nlm_build {
 **Note 2 — 项目上下文**（按 project 切换模板）：
 
 - `project=system`：MJ System 项目背景 + DDD 分层 + 数据仓库四层模型 + 双域设计
-- `project=agent`：MJ-AgentLab 项目背景 + Agent / LangGraph / MCP 架构（v2 新增）
+- `project=agent`：MJ-AgentLab 项目背景 + LangChain 1.x + LangGraph 1.1.8 + dual-track 文档框架（Code-Side + Agent-Side） + 数据边界 4 层防护（ADR-006）
 - `project=multi`：MJ System + MJ-AgentLab 联合上下文 + 跨项目对齐目标
 
 #### Note 转 Source（元知识提升）
@@ -386,14 +391,27 @@ Notebook:
 → Handoff: 推荐进入 /mj-nlm:learn
 ```
 
-### 示例 2：mj-agent 单 Agent 知识库（v2 新场景）
+### 示例 2：mj-agent 单 tool 知识库（v2 新场景）
 
 ```
-用户：把 EmailAgent 导入 NLM 当作学习材料
-→ 推断 project=agent, scope=agent, topic=EmailAgent
-→ Phase 1-5：扫描 agents/EmailAgent/ + docs/agents/EmailAgent/（占位符路径，需用户确认）
-→ Phase 6：source 总字数 ~8K → ALLOW
-→ Phase 7：领域定向报告含 Agent / Tool / Workflow 三层概念
+用户：把 mj-agent 的 sql introspect tool 当作学习材料
+→ 推断 project=agent, scope=tool, topic=sql-introspect
+→ Phase 1-5：扫描 src/mj_agent/tools/sql/introspect.py + tools/__init__.py + 相关 ADR-006 + tests/unit/tools/sql/
+→ 命名：MJ-agent-tool-sql-introspect-20260506
+→ Phase 6：source 总字数 ~6K → ALLOW（推荐 audio_brief / mind_map / quiz）
+→ Phase 7：领域定向报告含数据边界 4 层防护、guardrail 正则、analyst 角色权限
+→ Handoff
+```
+
+### 示例 2b：mj-agent 主代码包知识库（v2 新场景）
+
+```
+用户：把整个 mj-agent 包导进来做整体学习
+→ 推断 project=agent, scope=code, topic=mj_agent
+→ Phase 1-5：扫描 src/mj_agent/（agent.py / config.py / llm.py / state.py / integrations/） + langgraph.json + pyproject.toml
+→ 命名：MJ-agent-code-mj_agent-20260506
+→ Phase 6：source 总字数 ~30K → ALLOW 全部制品
+→ Phase 7：领域定向报告含 LangGraph 编排、create_agent 模式、ALL_TOOLS 注册、LLM 工厂
 → Handoff
 ```
 

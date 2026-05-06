@@ -142,7 +142,7 @@ skill 会引导你：
 
 ## 未实现 / 未来 v2.x roadmap
 
-- v2.0 → v2.1：mj-agent 实际目录路径替换占位符（需用户确认 mj-agent 仓库结构）
+- ✅ v2.0.1：mj-agent 实际目录路径定稿（6-scope 方案 B：code / tool / skill / prompt / docs / cross）
 - v2.1：Hooks 自动检测过期 24h 复述提醒
 - v2.2：marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
 - v2.3：移除 v1 `legacy_*` prompt 别名

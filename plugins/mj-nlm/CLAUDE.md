@@ -20,7 +20,7 @@ mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）
 | project | 说明 | 命名示例 |
 |---|---|---|
 | `system` | MJ System 主项目 | `MJ-system-mod-DQV-20260506` |
-| `agent` | MJ-AgentLab 项目 | `MJ-agent-agent-EmailAgent-20260506` |
+| `agent` | MJ-AgentLab 项目 | `MJ-agent-code-mj_agent-20260506` |
 | `multi` | 跨项目对齐 | `MJ-multi-cross-architecture-20260506` |
 | `intel` | 情报系统（v1 沿用） | `MJ-intel-pipe-analysis-20260506` |
 
