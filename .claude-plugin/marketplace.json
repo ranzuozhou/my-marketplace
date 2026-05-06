@@ -7,17 +7,17 @@
   },
   "metadata": {
     "description": "个人插件市场 — 提供知识管理、Git 工作流、插件开发等 Claude Code 插件",
-    "version": "1.4.1"
+    "version": "1.5.1"
   },
   "plugins": [
     {
       "name": "mj-nlm",
       "source": "./plugins/mj-nlm",
-      "description": "NotebookLM 知识库完整操作能力：认证、创建、管理、查询、Studio 制品生成",
-      "version": "1.0.0",
+      "description": "NotebookLM 学习闭环技能家族（v2.0）— mj-system + mj-agent 双项目知识工作流：认证 / 知识库构建（含领域定向报告 + 来源充足性预检）/ 生命周期管理 / 知识问答（错题 root cause + 来源核查 + 理解度自检）/ Studio 制品（学习导向 + 三版生成 + 幻觉防护）/ 学习闭环编排器（/mj-nlm:learn）",
+      "version": "2.0.1",
       "author": { "name": "ranzuozhou" },
       "category": "productivity",
-      "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio"],
+      "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio", "learning-loop", "domain-orientation", "quiz-feedback", "source-check", "mj-system", "mj-agent"],
       "license": "MIT"
     },
     {

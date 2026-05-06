@@ -5,6 +5,55 @@
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-05-06
+
+### Highlights
+
+mj-nlm 大版本升级 + 路径定稿（含两次合并：PR #18 v2.0.0 学习闭环重构、PR #19 v2.0.1 mj-agent 6-scope 路径定稿）。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.4.1 → 1.5.1** | mj-nlm major bump |
+| **mj-nlm** | **1.0.0 → 2.0.1** | **major bump**：学习闭环重构 + mj-agent 路径定稿 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v1.0.0 → v2.0.0（PR #18）
+
+从「被动产出制品」重构为「学习闭环」（依据 NotebookLM 多媒体学习方法论），覆盖范围扩展到 MJ-AgentLab 双子项目（mj-system + mj-agent）。
+
+- **新增 skill**：`mj-nlm-learn`（top-level orchestrator，10 Phase + 5 Gate 一键调度 build/studio/query）
+- **build 升级**：+Phase 6 来源充足性预检（输出 `00d-预检-` 元 source）+Phase 7 领域定向报告（输出 `00c-定向-` 元 source 作为学习地图锚）+双项目支持
+- **studio 升级**：+三版生成（foundation / structural / challenge view 子参数）+默认幻觉防护约束（disable_guardrails 子参数）+focus-prompt 模板重写为学习导向
+- **query 升级**：+Mode D 错题 root cause +Mode E 来源核查（5 级标注）+Mode F 7 项理解度自检（仪表盘 Note）
+- **shared 升级**：3 新文件（risk-control-templates / learning-loop-templates / understanding-metrics）+4 改写/扩展（focus-prompt / naming / material-classification / artifact-type）
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.0.0]`。
+
+### Fixed — mj-nlm v2.0.0 → v2.0.1（PR #19）
+
+定稿 v2.0 留下的 mj-agent 路径占位符：依据 mj-agent develop 实际目录（单 agent 单包，LangChain 1.x + LangGraph 1.1.8），把 4 scope 占位（agent/tool/workflow/cross 配 `agents/<Name>/` 等假设路径）替换为方案 B 的 6 scope（code / tool / skill / prompt / docs / cross 配真实 `src/mj_agent/...` 路径）。
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.0.1]`。
+
+### Breaking Changes
+
+仅 workflow 与产物层，不动 MCP 接口：
+
+- mj-nlm build 输出元 source 从 2 个增至 4 个（新增 `00c-定向-` `00d-预检-`）
+- mj-nlm studio 默认追加幻觉防护约束句（`disable_guardrails=True` 关闭，但 `risk-class:high` tag 强制开启）
+- mj-nlm v1 focus-prompt 模板保留为 `legacy_*` 别名（v2.3 弃用、v2.4 移除）
+
+### Migration
+
+- 现有 mj-nlm v1 notebook 的命名格式（`MJ-{project}-{scope}-{topic}-{YYYYMMDD}`）不变
+- 旧 `MJ-agent-agent-*` 命名仍可用，但新 mj-agent notebook 应改用 v2.0.1 6-scope（如 `MJ-agent-tool-sql-introspect-20260506`）
+- 现有 v1 `focus_prompt` 字符串调用不需修改即可继续工作（v2 默认在末尾追加约束句）
+
 ## [1.4.1] - 2026-04-21
 
 ### Added

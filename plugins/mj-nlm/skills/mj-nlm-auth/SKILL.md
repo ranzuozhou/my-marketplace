@@ -1,11 +1,12 @@
 ---
 name: auth
-version: 1.0.0
 description: >
-  Use when the user mentions NLM认证, NLM登录, NotebookLM认证, NLM token刷新,
+  MUST be used when the user mentions NLM认证, NLM登录, NotebookLM认证, NLM token刷新,
   NLM账号切换, or nlm login. Also use when NLM连接失败, NLM认证过期, refresh auth,
   nlm authentication, refresh token, switch account, nlm connection failed,
   nlm auth expired, or save auth tokens.
+  Do not use for: 创建知识库 (use mj-nlm:build), 生成制品 (use mj-nlm:studio),
+  问答 (use mj-nlm:query), 管理 (use mj-nlm:manage), 完整学习闭环 (use mj-nlm:learn).
 ---
 
 # mj-nlm:auth
