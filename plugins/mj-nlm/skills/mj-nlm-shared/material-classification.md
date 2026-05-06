@@ -1,8 +1,10 @@
-# Material Classification — 材料分类与敏感过滤规则
+# Material Classification v2 — 材料分类与敏感过滤规则
 
-## 三分法分类
+> v2 版本说明：v2 在原"三分法（直传 / 需转换 / 不导入）"基础上新增"多源类型"分类（url / youtube / drive / image / audio），覆盖方法论 §5「准备来源」推荐的 5 类来源材料。
 
-所有文件按扩展名分为三类，每类有明确的处理路径。
+## 三分法分类（本地文件，v1 沿用）
+
+所有本地文件按扩展名分为三类，每类有明确的处理路径。
 
 ### 直传（Direct Upload）
 
@@ -51,6 +53,69 @@ NLM 不直接支持的代码/配置文件。需要 Read 内容 → 敏感过滤 
 | `*.whl` / `*.tar.gz` | 分发包 |
 | `*.png` / `*.jpg` / `*.gif` / `*.svg` | 图片（NLM 不解析） |
 | `*.xlsx` / `*.xls` / `*.csv` | 数据文件（按需判断） |
+
+---
+
+## 多源类型分类（v2 新增）
+
+方法论 §5 建议每个 notebook 放入 **5 类来源**：原始材料 / 入门材料 / 案例材料 / 反例 / 困惑笔记。这些来源往往不只是本地文件，还包括网页、YouTube、Google Drive 等。v2 在此扩展 NLM 多源类型。
+
+### 来源类型矩阵
+
+| source_type | 调用形式 | 适用场景 | NLM 处理方式 | v2 推荐用途 |
+|---|---|---|---|---|
+| `file` | `source_add(source_type="file", file_path=...)` | 本地文件（按"三分法"分类） | 见上 | 原始材料、规范、代码 |
+| `text` | `source_add(source_type="text", text=..., title=...)` | 文本内容（含转换的代码） | 直接索引 | 困惑笔记、转换后的代码、外部摘录 |
+| `url` | `source_add(source_type="url", url=...)` | 网页 | **仅提取正文文本**（无样式、图片） | 案例材料、社区讨论、博客 |
+| `youtube` | `source_add(source_type="url", url="https://www.youtube.com/...")` | 公开 YouTube 视频 | **仅提取字幕 / 自动转录**（无音视频本身） | 入门材料、社区案例 |
+| `drive` | `source_add(source_type="drive", document_id=...)` | Google Docs / Slides | NLM 原生支持 | 协作笔记、共享 SOP |
+
+### 各类型注意事项
+
+#### url（网页）
+
+- NLM 仅导入正文文本，**不导入图片、视频、嵌入内容**
+- JS 渲染的页面可能导入失败（建议用浏览器"另存为 mhtml/PDF"再 file 导入）
+- 长文章建议先存为 PDF 再 file 导入（更稳定的解析）
+- **批量导入**：`urls="<url1>, <url2>"` 逗号分隔
+
+#### youtube（公开视频）
+
+- 必须是公开视频，私有视频无法导入
+- NLM 仅取**字幕（caption）或自动转录文本**，不取音视频本身
+- 没有字幕的视频导入后内容空白
+- **不要**用 YouTube 链接代替音频文件 source；如需音频内容直接用 `source_type="audio"`（如 NLM 支持）
+
+#### drive（Google Docs/Slides）
+
+- 需 OAuth 已授权（NLM 与 Google 账号联动）
+- 文档需已分享给 NLM 账号或同账号下
+- Slides 自动提取文本（保留章节顺序）
+- 大型文档建议拆分多个 source
+
+#### image / audio / video（多媒体源）
+
+- NLM 不直接解析图片，建议手动 OCR 或截图描述后用 text 导入
+- audio source（如 NLM CLI 支持）：直接导入会触发自动转录；转录质量影响下游 NLM 检索精度
+- video：建议先 YouTube 上传或转 audio 后导入
+
+### 来源类型与方法论 §5 推荐 5 类来源对应
+
+| 5 类来源 | 推荐 source_type | 备注 |
+|---|---|---|
+| 原始材料（你真正想理解的） | file (PDF/MD) / drive | 主体内容，应占 source 总数 50%+ |
+| 入门材料 | youtube / url / file (PDF) | 可选；零基础时强烈推荐 |
+| 案例材料 | url（社区讨论 / Reddit / HN） / file | 暴露真实使用中的坑 |
+| 反例 / 批评材料 | url / file | 防止只看正面叙事 |
+| 自己的困惑笔记 | text | 告诉 NLM "我目前卡在哪里"，影响领域定向报告生成质量 |
+
+### 来源充足性预检（v2，build Phase 6）
+
+所有 source 添加完成后，build skill 会扫描：
+
+- source 数量（< 5 → 警告 underloaded；> 50 → 触发 H4b）
+- 总字数（< 5K / 5K-30K / 30K-100K / > 100K → 见 `risk-control-templates.md §1`）
+- 来源类型分布（如全是 youtube 字幕 → 警告"来源单一可能影响领域定向准确性"）
 
 ---
 

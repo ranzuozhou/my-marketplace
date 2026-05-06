@@ -140,8 +140,57 @@ studio_create(
     question_count: int,        # quiz 专用
     description: str,           # data_table 专用（必填）
     title: str,                 # mind_map 专用
+    # v2 新增子参数（horizontal）
+    view: str = "default",      # 学习视角：default | foundation | structural | challenge
+    disable_guardrails: bool = False,  # 跳过默认幻觉防护约束（仅推荐内部技术分享场景）
+    focus_prompt_template: str = None, # legacy_* 模板别名（迁移期使用）
 )
 ```
+
+## v2 新增子参数详解
+
+### `view`（学习视角，对所有 artifact_type 生效）
+
+来自方法论 §8「同一内容生成三版」。在 v2 中，可对同一 notebook 同一 artifact_type 生成三个难度版本：
+
+| view | 模板路径 | 适用 |
+|---|---|---|
+| `default`（默认） | `focus-prompt-templates.md#{artifact_type}（默认）` | v1 兼容，单一版本 |
+| `foundation` | `focus-prompt-templates.md#{artifact_type} + view=foundation` | 零基础版：少术语、多类比 |
+| `structural` | `focus-prompt-templates.md#{artifact_type} + view=structural` | 结构版：概念地图、适用边界 |
+| `challenge` | `focus-prompt-templates.md#{artifact_type} + view=challenge` | 挑战版：反例、迁移题 |
+
+**调用示例**：
+
+```python
+# 三版连续生成
+for view in ("foundation", "structural", "challenge"):
+    studio_create(
+        notebook_id=nb_id,
+        artifact_type="audio",
+        view=view,
+        focus_prompt=...,
+        language="zh",
+        confirm=True,
+    )
+```
+
+文件命名后缀：`{title}-{view}.{ext}`，如 `DQV技术概述-foundation.mp3`。
+
+### `disable_guardrails`（关闭幻觉防护约束）
+
+默认 `False`：所有 studio_create 在拼接 focus_prompt 时自动追加 `risk-control-templates.md §2` 中的固定约束句。
+
+设 `True` 时跳过追加，仅推荐用于：
+- 内部技术分享场景（受众已知来源、不会作为外部决策依据）
+- v1 prompt 向后兼容（迁移期）
+- 测试场景
+
+**安全提醒**：高风险类别 notebook（含医疗 / 法律 / 财务 / 合同 / 考试关键词，详见 `risk-control-templates.md §3`）禁止 disable_guardrails，调用方在 build skill 已自动标记 `risk-class:high` tag，studio 检测到此 tag 强制忽略 `disable_guardrails=True` 设置。
+
+### `focus_prompt_template`（v1 兼容别名）
+
+`legacy_*` 别名（v2.0 / v2.1 / v2.2 仍可用，v2.3 抛 deprecation warning，v2.4 移除）。详见 `focus-prompt-templates.md` 末尾的 v1→v2 兼容性表。
 
 ## download_artifact 参数参考
 

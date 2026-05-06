@@ -1,11 +1,13 @@
 ---
 name: manage
-version: 1.0.0
 description: >
-  Use when the user asks to 管理NLM知识库, NLM管理, notebook管理, 删除notebook,
+  MUST be used when the user asks to 管理NLM知识库, NLM管理, notebook管理, 删除notebook,
   重命名notebook, 管理source, 删除source, NLM标签, 分享notebook, NLM分享,
   manage notebook, nlm manage, rename notebook, delete notebook,
   manage sources, nlm tags, share notebook, or notebook lifecycle.
+  Do not use for: 创建/重建知识库 (use mj-nlm:build), 生成制品 (use mj-nlm:studio),
+  问答/错题分析/来源核查 (use mj-nlm:query), 完整学习闭环 (use mj-nlm:learn),
+  仅认证修复 (use mj-nlm:auth).
 ---
 
 # mj-nlm:manage
