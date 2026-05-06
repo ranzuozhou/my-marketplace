@@ -1,209 +1,394 @@
-# Focus Prompt Templates — Studio 制品生成引导模板
+# Focus Prompt Templates v2 — 学习导向 Studio 制品引导模板
 
-## 两层拼接策略
+> v2 版本说明：v2 重写为「学习闭环」导向（参考方法论 §4「不要让 NotebookLM 总结内容，要让它生成理解路径」）。v1 是「技术分享 / 培训」导向，保留为 `legacy_*` 别名，v2.3 移除。
 
-Focus Prompt 由两层组合而成，确保制品既符合格式要求又贴合内容：
+## 三层拼接策略
 
-1. **Intent Layer** — 基于 artifact_type 选择模板，定义制品的格式和受众
-2. **Content Layer** — 从 `notebook_describe()` 提取关键主题词，补充具体内容方向
+Focus Prompt 由三层组合而成：
 
-### 组合公式
+1. **Intent Layer** — 基于 artifact_type + view（学习视角）选模板
+2. **Content Layer** — 从 `notebook_describe()` + `00c-定向-` 领域定向报告提取主题词
+3. **Guardrails Layer** — 自动追加幻觉防护约束（详见 `→ ./risk-control-templates.md#2`）
 
 ```
-Focus Prompt = Intent Layer（模板填充） + Content Layer（主题词补充）
+Focus Prompt = Intent Layer + Content Layer + Guardrails Layer
 ```
 
-**语言设置**：使用 `language="zh"`（BCP-47 代码），NLM AI 支持跨语言理解。
+**语言**：`language="zh"`（中文输出，BCP-47）。
+
+**v2 与 v1 的关键差异**：
+- Intent Layer 不再写"面向开发者的技术播客"，而是写"零基础学习者从陌生到理解的进入材料"
+- 强制引用 `00c-定向-{topic}` 领域定向报告作为锚
+- Guardrails Layer 默认追加（除非 `disable_guardrails=True`）
 
 ---
 
-## Intent Layer 模板
+## Intent Layer 模板（按 artifact_type × view 组合）
 
 ### audio（音频播客）
 
+#### audio + view=foundation（零基础版）
+
 ```
-面向{audience}的{topic}技术播客，以通俗易懂的对话形式介绍核心概念和设计决策
+面向{audience}的{topic}零基础版音频。
+
+主持人 A 与 B 用对话方式：
+- A 假设听众没有任何背景，用日常生活类比开场
+- B 不断追问"普通人会怎么误解这个？"
+- 每引入一个术语，先用日常语言解释再说专业定义
+- 长度控制在 brief，先降低进入门槛
+
+结尾给"听完后我现在能回答的 3 个最简单问题"。
+
+【参考】参考 00c 领域定向报告中的"原始困惑翻译"和"术语翻译表"。
 ```
 
-**适用场景**：新人培训、知识分享、通勤学习
-**搭配子参数**：`audio_format="brief"` 概述 / `"deep_dive"` 深入 / `"critique"` 评析 / `"debate"` 辩论
+#### audio + view=structural（结构版）
+
+```
+面向{audience}的{topic}结构版音频，5 分钟一节小结。
+
+主持人 A 解释概念，主持人 B 不断追问：
+- 这个概念和相邻概念的区别是什么？
+- 什么时候不适用？适用边界在哪？
+- 新手最容易误解什么？
+
+每个核心概念配：定义 → 最小例子 → 反例 → 常见误解。
+
+结尾给"听完后必须能回答的 5 个问题"。
+
+【参考】参考 00c 领域定向报告中的"核心概念地图"和"成功失败案例"。
+```
+
+#### audio + view=challenge（挑战版）
+
+```
+面向{audience}的{topic}挑战版音频。
+
+主持人 A 抛出 3 个"看似适用但不适用"的边界情形，B 分析为什么不适用。
+
+至少包含：
+- 3 个反例（含分析 why）
+- 2 个迁移应用题（把原则用到相邻领域）
+- 5 道"如果错答说明哪个概念没掌握"的诊断题
+
+不要凑长度，密度高于时长。
+
+【参考】参考 00c 领域定向报告中的"成功失败案例的机制"。
+```
+
+#### audio（默认，向后兼容）
+
+```
+面向{audience}的{topic}多形态学习音频，作为陌生主题的「第一遍进入」。
+
+要求：
+1. 用一个现实困惑开场，假设听众没有背景
+2. 解释这个领域能解决什么、不能解决什么
+3. 用 3 个成功案例 + 3 个失败案例对比说明
+4. 建立概念地图（核心 / 相邻 / 前置 / 误解）
+5. 每个抽象概念配最小例子和反例
+6. 5 分钟一节小结
+7. 结尾给"听完后我应该能回答的 5 个问题"
+
+语气：耐心的老师。避免营销式夸张、过度简化、无来源依据的结论。
+```
+
+---
 
 ### video（视频概述）
 
+#### video（默认）
+
 ```
-面向{audience}的{topic}可视化讲解视频，直观展示架构和流程
+面向{audience}的{topic}视频概述，作为第一遍进入主题的可视化讲解。
+
+按以下结构：
+1. 现实困惑开场（为什么需要理解这个？）
+2. 领域能做什么 / 不能做什么
+3. 3 个成功案例（何时有用）
+4. 3 个失败案例（何时会误导）
+5. 概念地图（核心 / 相邻 / 前置 / 误解）
+6. 最小例子 + 反例
+7. 看完应能回答的 5 个问题
+
+风格：耐心讲解，避免堆砌术语。
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：技术演示、可视化教学
-**搭配子参数**：`video_format="explainer"` 讲解 / `"brief"` 简要 / `"cinematic"` 电影风格
+#### video + view=foundation/structural/challenge
+
+同 audio 三版的精神，针对 video 改写：foundation 多类比、structural 重概念地图、challenge 重反例与迁移题。
+
+---
+
+### slide_deck（幻灯片）
+
+#### slide_deck（默认）
+
+```
+面向{audience}的{topic}可复习讲义（不是营销汇报）。
+
+每页只讲一个核心点，多用图解 / 流程图 / 对比表，避免长段文字。
+
+结构：
+1. 标题：本主题在解决什么问题？
+2. 新手原始困惑（不用术语描述）
+3. 领域地图（属于什么大领域、与哪些相邻领域容易混）
+4. 核心概念 1：定义 / 用途 / 最小例子 / 反例 / 常见误解
+5. 核心概念 2：同上
+6. 核心概念 3：同上
+7. 成功案例：为什么成功 / 依赖什么条件
+8. 失败案例：为什么失败 / 误用了什么概念
+9. 判断清单：遇到新问题时如何判断本知识是否适用
+10. 自测题（5 道）：定义 / 例子 / 反例 / 迁移
+
+【参考】参考 00c 领域定向报告中的"学习路线"和"核心概念地图"。
+```
+
+#### slide_deck + view=foundation/structural/challenge
+
+参考 audio 三版精神。
+
+---
 
 ### infographic（信息图）
 
 ```
-面向{audience}的{topic}信息图，可视化展示核心架构、数据流和关键指标
+{topic}的可视化信息图，单页可读完。
+
+要素：
+- 中心放领域核心问题
+- 周围放 5-7 个核心概念（含一句话定义）
+- 标出 2-3 个常见误解（红色警示）
+- 角落放 1 个成功案例 + 1 个失败案例的关键差异
+- 底部放一行"判断本知识是否适用"的判断清单
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：架构可视化、流程展示、数据对比
-**搭配子参数**：`infographic_style="professional"` 专业 / `"sketch_note"` 手绘 / `"bento_grid"` 卡片式
+---
 
-### slide_deck（幻灯片）
+### report（报告文档）
 
-```
-面向{audience}的{topic}技术演示，结构清晰、重点突出，适合{minutes}分钟的技术分享
-```
-
-**适用场景**：技术分享会、团队培训、架构评审
-**搭配子参数**：`slide_format="detailed_deck"` 详细 / `"presenter_slides"` 演讲者版
-
-### report — Briefing Doc（简报文档）
+#### report — Briefing Doc（简报）
 
 ```
-面向{audience}的{topic}技术简报，提炼关键信息和决策要点，适合快速了解全貌
+面向{audience}的{topic}简报文档，提炼关键信息和决策要点。
+
+要求：
+1. 一段大图描述（不超过 200 字）
+2. 5 个关键判断（每条引用具体 source）
+3. 3 个成功 / 3 个失败案例的机制对比表
+4. 风险与不确定项清单
+5. 推荐下一步行动
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：管理层汇报、跨团队沟通
-**使用**：`report_format="Briefing Doc"`
-
-### report — Study Guide（学习指南）
+#### report — Study Guide（学习指南）
 
 ```
-帮助{audience}系统学习{topic}的指南，包含知识点梳理、学习路径和自测问题
+帮助{audience}系统学习{topic}的指南。
+
+按以下结构：
+1. 学习路线（从零基础到能理解，列每段需读哪些 source）
+2. 核心概念地图（含前置 / 高级标注）
+3. 术语翻译表（20 个，含日常语言/专业定义/最小例子/反例/常见误解）
+4. 成功 / 失败案例机制分析
+5. 自测问题（10 道，按定义 / 例子 / 反例 / 迁移分类）
+6. 判断清单（遇到新问题时的适用性判断）
+
+【参考】参考 00c 领域定向报告 + 00a 内容导航大纲。
 ```
 
-**适用场景**：新人入职培训、技能提升
-**使用**：`report_format="Study Guide"`
-
-### report — Blog Post（博客文章）
+#### report — Blog Post（博客）
 
 ```
-面向{audience}的{topic}技术博客，以叙事方式介绍背景、实现和经验总结
+{topic}的技术博客（叙事风格）。
+
+按以下结构：
+1. 用一个具体故事开场（来自来源中的案例）
+2. 引出领域问题
+3. 解释关键概念，逐层深入
+4. 经验与教训（含失败案例）
+5. 给读者的可迁移原则
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：技术分享、知识沉淀
-**使用**：`report_format="Blog Post"`
+#### report — Glossary（术语词典，新增）
 
-### report — Create Your Own（自定义）
+调用方式：`report_format="Create Your Own"`, `custom_prompt=<§6 术语翻译模板>`，详见 `→ ./learning-loop-templates.md#§6`。
 
-```
-{自定义格式描述}
-```
+#### report — Mechanism Analysis（机制分析，新增）
 
-**适用场景**：标准格式不满足需求时
-**使用**：`report_format="Create Your Own"`, `custom_prompt="{格式描述}"`
+调用方式：`report_format="Create Your Own"`, `custom_prompt=<§4 成功失败案例机制分析>`，详见 `→ ./learning-loop-templates.md#§4`。
+
+---
 
 ### flashcards（闪卡）
 
 ```
-{topic}的关键概念和要点闪卡，帮助{audience}快速记忆核心知识
+{topic}的核心概念与要点闪卡。
+
+每张卡：
+- 正面：1 个术语 / 1 个概念问题 / 1 个反例情形
+- 背面：日常语言 + 专业定义 + 最小例子 + 反例
+
+至少包含：
+- 10 张定义类
+- 5 张反例类
+- 5 张迁移类（"如果场景变成 X，本概念是否适用？"）
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：培训后复习、知识记忆强化
+---
 
 ### quiz（测验）
 
 ```
-{topic}的知识测验，覆盖{audience}应掌握的核心概念和实践要点
+{topic}的知识测验，覆盖{audience}应掌握的核心概念。
+
+题型分布（{question_count} 题）：
+- 30% 定义题（直接考概念）
+- 30% 例子 / 反例题（区分适用与不适用）
+- 20% 案例分析题（成功 / 失败机制）
+- 20% 迁移应用题（用原则解决新问题）
+
+不要只考记忆，要考"能不能判断适用边界"。
+
+每题附简要解析（来源 + 推理）。
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：培训考核、自我评估
-**搭配子参数**：`question_count=10` 题目数 + `difficulty="medium"` 难度
+---
 
 ### data_table（数据表）
 
 ```
-从{topic}中提取{数据描述}的结构化数据表
+从{topic}中提取「{description}」的结构化数据表。
+
+要求：
+- 严格按用户描述的字段提取
+- 来源中找不到对应数据时填 "N/A"，不要编造
+- 每行附 source 引用
+
+【参考】参考 00c 领域定向报告。
 ```
 
-**适用场景**：数据提取、对比分析
-**注意**：`description` 参数必填，需明确描述要提取的数据
+---
 
 ### mind_map（思维导图）
 
 ```
-{topic}的知识图谱，可视化展示核心概念、模块关系和依赖链路
-```
+{topic}的概念地图。
 
-**适用场景**：架构可视化、知识梳理
+要求：
+- 中心节点 = 领域核心问题
+- 第 1 层 = 核心概念（5-7 个）
+- 第 2 层 = 每个核心的子概念 + 关键属性
+- 第 3 层 = 最小例子 / 反例 / 适用边界
+- 用不同颜色或符号标记：⭐ 前置 / ⚠️ 易误解 / 🚫 反例
+
+【参考】参考 00c 领域定向报告中的"核心概念地图"。
+```
 
 ---
 
-## Content Layer 提取方法
+## Content Layer 提取方法（v2 增强）
+
+v1 仅从 `notebook_describe()` 摘要提取。v2 升级为：
 
 1. 调用 `notebook_describe(notebook_id)` 获取 AI 摘要
-2. 从摘要中提取 3-5 个关键主题词
-3. 将主题词补充到 Intent Layer 模板中
-4. 追加元知识引导句（见下方「元知识引导句」）
+2. **额外读取 `00c-定向-{topic}领域定向报告` source 的"核心概念地图"段**
+3. 提取 5-8 个关键概念词（v1 只提 3-5 个）
+4. 将概念词补充到 Intent Layer 模板的 `{topic}` 与新增的"重点覆盖"字段
 
-**提取示例**：
+**v2 提取示例**：
 
-摘要：`"本 notebook 包含 DQV 数据质量验证服务的设计规范、三阶段处理管道（解压→验证→分发）、验证策略和数据库 ETL 模式"`
+源摘要：`"本 notebook 包含 DQV 数据质量验证服务的设计规范、三阶段处理管道、验证策略、ETL 模式"`
 
-提取主题词：`三阶段管道`、`验证策略`、`ETL 模式`
+定向报告核心概念：`三阶段管道 / 验证策略 / 错误降级 / 数据契约 / ETL 加载`
 
-#### 元知识引导句（当 Notebook 包含导航 Source 时）
+提取主题词（v2）：`三阶段管道、验证策略、错误降级、数据契约`（4 个）
 
-在 Content Layer 末尾追加固定引导句，指导 NLM 利用元知识理解材料结构：
-
-**引导句模板**：
-> 参考「内容导航大纲」理解材料间的逻辑关系和推荐阅读顺序，参考「项目上下文」理解知识库的定位和背景
-
-**组合示例**（含元知识引导）：
-```
-"面向新人开发者的 DQV 三阶段验证管道技术播客，
- 重点覆盖解压、验证、分发三个核心阶段，
- 参考内容导航大纲理解材料间的逻辑关系和推荐阅读顺序，
- 参考项目上下文理解知识库的定位和背景"
-```
+最终 Content Layer：`重点覆盖三阶段管道、验证策略、错误降级与数据契约的设计与实现`
 
 ---
 
-## 组合示例
+## Guardrails Layer（默认追加）
 
-### 示例 1：DQV 音频播客（audio + deep_dive）
+详见 `→ ./risk-control-templates.md#2 默认幻觉防护约束句`。
+
+可通过 `disable_guardrails=True` 关闭（仅推荐用于内部技术分享场景）。
+
+---
+
+## 完整组合示例
+
+### 示例 1：DQV 零基础版音频（v2）
 
 ```
 artifact_type: audio
-audio_format: deep_dive
-focus_prompt: "面向后端开发者的 DQV 数据质量验证管道技术播客，重点覆盖解压、验证、分发三个核心阶段及验证策略设计"
+audio_format: brief
+view: foundation
+focus_prompt:
+  Intent Layer (audio + view=foundation):
+    "面向新人开发者的 DQV 数据质量验证零基础版音频..."（如上）
+  Content Layer:
+    "重点覆盖三阶段管道、验证策略、错误降级与数据契约的设计与实现"
+  Guardrails Layer:
+    "【约束】所有关键判断必须引用来源；来源中没有的内容标注「推断」..."
 ```
 
-### 示例 2：全链路幻灯片（slide_deck）
-
-```
-artifact_type: slide_deck
-slide_format: detailed_deck
-focus_prompt: "面向团队的数据收集全链路技术演示，适合 20 分钟的技术分享，覆盖 AEC 邮件收集、DQV 质量验证、QVL 数据加载的端到端流程"
-```
-
-### 示例 3：数据库学习指南（report + Study Guide）
+### 示例 2：陌生主题学习指南（v2）
 
 ```
 artifact_type: report
 report_format: Study Guide
-focus_prompt: "帮助新人 DBA 系统学习 MJ System 数据仓库架构的指南，包含双域设计（ops/biz）、四层模型（ODS→DWD→DWS→ADS）、ETL 模式和命名规范"
+focus_prompt:
+  Intent Layer (Study Guide):
+    "帮助零基础学习者系统学习 PMP 备考的指南..."（如上）
+  Content Layer:
+    "重点覆盖五大过程组、十大知识领域、敏捷与混合方法、考试思维"
+  Guardrails Layer: 默认约束
 ```
 
 ---
 
-## 受众（audience）常用值
+## 受众（audience）常用值（v2 扩展）
 
 | audience | 适用场景 |
-|----------|---------|
+|---|---|
+| 零基础学习者 | 完全陌生的主题（v2 默认） |
 | 新人开发者 | 入职培训、基础学习 |
-| 后端开发者 | 技术细节、代码级分析 |
-| 团队 | 技术分享、Sprint 回顾 |
-| 管理层 | 进度汇报、架构决策 |
-| DBA | 数据库设计、ETL 优化 |
-| DevOps | CI/CD、Docker、部署 |
+| 后端开发者 / DBA / DevOps | 技术细节场景 |
+| 团队 / 管理层 | 技术分享、评审 |
+| 跨领域学习者 | 把本领域知识迁移到相邻领域 |
 
 ---
 
-## MJ System 推荐制品组合
+## v2 推荐制品组合（学习闭环导向）
 
-| 场景 | 推荐制品 | 原因 |
-|------|---------|------|
-| **新人入职** | audio(brief) + report(Study Guide) + flashcards | 音频快速了解 → 指南系统学习 → 闪卡强化记忆 |
-| **技术分享** | slide_deck + infographic | 幻灯片演示 + 信息图做辅助 |
-| **架构评审** | report(Briefing Doc) + mind_map | 简报抓重点 + 思维导图看全局 |
-| **深度学习** | audio(deep_dive) + report(Study Guide) + quiz | 深度音频 + 系统指南 + 测验自测 |
-| **知识沉淀** | mind_map + report(Blog Post) + data_table | 思维导图结构化 + 博客叙事 + 数据表提取关键信息 |
+| 场景 | 推荐顺序 | 备注 |
+|---|---|---|
+| **陌生主题首次学习** | 领域定向报告 → mind_map → audio(brief, foundation) → slide_deck → audio(deep_dive, structural) → quiz → flashcards | 方法论 §11 推荐流程 |
+| **MJ 内部新人入职** | mind_map → slide_deck → audio(brief) → quiz → 错题 root cause | 沿用 v1 但加 quiz 闭环 |
+| **架构评审** | report(Briefing Doc) → mind_map → audio(deep_dive) | guardrails 必开 |
+| **三版深度学习** | view=foundation → view=structural → view=challenge（同 artifact_type） | 高级模式，配额×3 |
+| **决策支持** | report(Briefing Doc) + Source Check（强制） | 高风险类别强制 |
+
+---
+
+## v1 → v2 兼容性（迁移期）
+
+| v1 模板名 | v2 替代 | 弃用版本 |
+|---|---|---|
+| `legacy_audio_tech_podcast` | `audio` 默认 | v2.3 |
+| `legacy_slide_tech_demo` | `slide_deck` 默认 | v2.3 |
+| `legacy_report_briefing` | `report(Briefing Doc)` 默认 | v2.3 |
+
+调用方法：`focus_prompt_template="legacy_audio_tech_podcast"`（v2.0 / v2.1 / v2.2 仍可用，v2.3 抛 deprecation warning，v2.4 移除）。
