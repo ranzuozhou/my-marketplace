@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-05-06
+
+### Changed
+
+- **`project=agent` 扫描映射定稿**：依据 mj-agent develop 仓库实际目录树，把 v2.0 的占位符（`agents/` `tools/` `workflows/`，4 scope）替换为方案 B 的 6 scope 真实映射。mj-agent 是单 agent 单包项目（LangChain 1.x + LangGraph 1.1.8 + Python 3.13 + dual-track 文档框架），新 scope 集：
+  - `code` → `src/mj_agent/` 整包 + `langgraph.json` + `pyproject.toml`
+  - `tool` → `src/mj_agent/tools/{ToolName}/`（含 `tools/sql/{guardrail,execute,introspect}.py`）+ `tools/__init__.py` ALL_TOOLS 注册
+  - `skill` → `src/mj_agent/skills/{SkillName}/SKILL.md`（Track B）+ 关联 EVAL / PROMPT
+  - `prompt` → `src/mj_agent/prompts/system.md` + 其他 prompt 文件（Track B）
+  - `docs` → `docs/{adr,rule,infrastructure,assessments}/`（Track A）按聚焦点取子集
+  - `cross` → `CLAUDE.md` + `pyproject.toml` + `langgraph.json` + `plans/` + `.env.example`
+- **删除 scope `agent` 与 `workflow`**（旧占位符，与 mj-agent 单 agent 实际不符）
+- **新增 source 类别标签**：`Agent核心` / `Skill` / `Prompt` / `集成`；移除 v2.0 的 `工作流` 标签
+- **同步更新文件**：`naming-reference.md#project=agent`（scope 表 + Scope→默认扫描范围映射 + tag 示例）、`build/SKILL.md`（Phase 1 scope 映射表 + 命名示例 + Note 2 项目上下文模板 + Examples 2/2b）、`CLAUDE.md`（命名示例）、`README.md`（roadmap 标记）
+
+### Notes
+
+- 这是对 v2.0「Known Issues #1（mj-agent 路径占位符）」的定稿修订，无新功能、无 MCP 接口变更
+- v2.0 → v2.0.1 的迁移：现有 `MJ-agent-agent-*` 命名 notebook 仍可用（命名格式向后兼容），但建议新建 notebook 改用新 scope（`code` / `tool` / `skill` / `prompt` / `docs` / `cross`）
+
 ## [2.0.0] - 2026-05-06
 
 ### 升级主旨

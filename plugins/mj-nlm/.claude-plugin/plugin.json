@@ -1,7 +1,7 @@
 {
   "name": "mj-nlm",
   "description": "MJ-AgentLab NotebookLM 学习闭环技能家族 - 覆盖 mj-system + mj-agent 双项目，提供认证、知识库构建（含领域定向报告）、生命周期管理、知识问答（错题反馈/来源核查/理解度自检）、Studio 制品生成（含三版与幻觉防护）以及一站式学习编排（/mj-nlm:learn）",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": {
     "name": "ranzuozhou"
   },

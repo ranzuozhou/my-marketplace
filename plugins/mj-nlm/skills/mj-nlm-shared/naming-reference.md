@@ -15,8 +15,8 @@ MJ-{project}-{scope}-{topic}-{YYYYMMDD}
 | project | 说明 | 示例 |
 |---|---|---|
 | `system` | MJ System 主项目（数据处理与分析平台） | `MJ-system-mod-DQV-20260315` |
-| `agent` | MJ-AgentLab 项目（Agent / LangGraph / MCP 服务） | `MJ-agent-agent-EmailAgent-20260505` |
-| `multi` | 跨项目对齐 | `MJ-multi-cross-architecture-20260505` |
+| `agent` | MJ-AgentLab 项目（LangChain 1.x + LangGraph，单 agent 单包结构） | `MJ-agent-code-mj_agent-20260506` |
+| `multi` | 跨项目对齐 | `MJ-multi-cross-architecture-20260506` |
 | `intel` | 情报系统（v1 沿用） | `MJ-intel-pipe-analysis-20260315` |
 
 > v2 起 `agent` project 进入正式支持；`intel`/`multi` 沿用 v1 定义。
@@ -36,12 +36,16 @@ MJ-{project}-{scope}-{topic}-{YYYYMMDD}
 
 ### project=agent（MJ-AgentLab，v2 新增）
 
+mj-agent 是单 agent 单包项目（`src/mj_agent/` 一个包即一个 LangGraph agent），使用 dual-track 文档框架（Code-Side + Agent-Side）。scope 按内部组成切分：
+
 | scope | 说明 | 适用 |
 |---|---|---|
-| `agent` | 单 Agent | 聚焦一个 Agent 的实现、提示词、工具集 |
-| `tool` | 工具 / MCP | Agent 调用的 tool 或 MCP server |
-| `workflow` | 工作流 / LangGraph | 多 Agent / 多 tool 编排的工作流 |
-| `cross` | 全局 / 跨域 | Agent 框架、共享 prompt、跨 Agent 设计 |
+| `code` | 主代码包 | `src/mj_agent/` 整包（agent.py / config / llm / state / integrations） |
+| `tool` | 单个 tool | `src/mj_agent/tools/{ToolName}/`，如 `tools/sql/{guardrail,execute,introspect}.py` |
+| `skill` | 单个 SKILL.md（Track B） | `src/mj_agent/skills/{SkillName}/SKILL.md` 及关联资源 |
+| `prompt` | Prompt 资产（Track B） | `src/mj_agent/prompts/`（含 `system.md`） |
+| `docs` | Track A 文档 | `docs/{adr,rule,infrastructure,assessments}/` 单选或组合 |
+| `cross` | 全局 / 跨 track | `CLAUDE.md` + `pyproject.toml` + `langgraph.json` + `plans/` + `.env.example` + 双 track 概览 |
 
 ### project=multi（跨项目）
 
@@ -103,40 +107,72 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 
 ---
 
-### project=agent（v2 新增，待用户提供 mj-agent 真实目录后定稿）
+### project=agent（v2，依据 mj-agent develop 实际目录）
 
-> ⚠️ 以下路径为**占位符默认值**，基于通用 Agent / LangGraph 项目布局推测。实际使用前需用户提供 mj-agent 仓库目录树确认或修正。修正方式：直接更新本文件相应小节。
+> mj-agent 是单 agent 单包项目（LangChain 1.x + LangGraph 1.1.8 + Python 3.13），主入口 `langgraph.json` → `src/mj_agent/agent.py:make_graph()`。文档分两 track（详见 `docs/rule/[STANDARD]_MJ_Agent_Documentation_Meta_Framework_v2.0.md`）。
 
-#### agent + agent（单 Agent）
+#### agent + code（主代码包）
 
-候选扫描目录：
-- `agents/{AgentName}/` — Agent 主目录（含 prompt.py / tools.py / config.yaml 等）
-- `docs/agents/{AgentName}/` — Agent 设计文档
-- `prompts/{AgentName}/` — 独立 prompt 文件（如有）
-- `evals/{AgentName}/` — Agent 评测集（如有）
+扫描目录：
+- `src/mj_agent/` — 主包（含 `agent.py` / `config.py` / `llm.py` / `state.py`）
+- `src/mj_agent/integrations/` — 基础设施（如 `mj_system_db.py`）
+- `src/mj_agent/tools/` — 全部 tool 子目录（含 `tools/sql/`）
+- `langgraph.json` — LangGraph Studio 入口
+- `pyproject.toml` — 依赖与 ruff/pytest 配置
+- `tests/unit/` — 单元测试（按需，规模大时 H4b）
 
-#### agent + tool（工具 / MCP）
+> code scope 默认包含 prompts/ 与 skills/ 子目录的元数据，但不深入它们的全文（细节走 `prompt` / `skill` scope）。
 
-候选扫描目录：
-- `tools/{ToolName}/` — tool 实现
-- `mcp/{ToolName}/` — MCP server 定义（如有）
-- `docs/tools/{ToolName}/`
-- `.mcp.json`（如位于根）
+#### agent + tool（单个 tool）
 
-#### agent + workflow（LangGraph / 编排）
+扫描目录：
+- `src/mj_agent/tools/{ToolName}/` 或 `src/mj_agent/tools/{tool_module}.py`
+- `src/mj_agent/tools/__init__.py` — `ALL_TOOLS` 注册
+- 相关测试 `tests/unit/tools/{ToolName}/`（如有）
+- 相关 ADR：`docs/adr/[ADR]_*_{tool 主题}.md`（如 ADR-006 数据边界）
 
-候选扫描目录：
-- `workflows/{WorkflowName}/` 或 `langgraph/{WorkflowName}/`
-- `docs/workflows/{WorkflowName}/`
-- `graphs/{WorkflowName}/`（如使用此命名）
+> 当前已存在的 tool 子集：`tools/sql/{guardrail,execute,introspect}.py`，三件套各自独立 source 或合并一个 notebook。
 
-#### agent + cross（全局）
+#### agent + skill（Track B SKILL.md）
 
-候选扫描目录：
-- `docs/`
-- `CLAUDE.md`
-- `prompts/shared/`
-- `agents/_base/` 或 `agents/_shared/`（基类、共享逻辑）
+扫描目录：
+- `src/mj_agent/skills/{SkillName}/` — SKILL.md 与子文档
+- `src/mj_agent/skills/{SkillName}/SKILL.md` — 主文档（loader 会 strip frontmatter）
+- 相关 EVAL：`docs/.../EVAL/{SkillName}/`（Phase 2 起强制）
+- 相关 PROMPT 引用：`src/mj_agent/prompts/<相关>.md`（如本 skill 引用）
+
+#### agent + prompt（Track B PROMPT 资产）
+
+扫描目录：
+- `src/mj_agent/prompts/system.md` — 系统提示
+- `src/mj_agent/prompts/*.md` — 其他 prompt（按命名取）
+- 相关 EVAL：`docs/.../EVAL/{prompt_name}/`
+- `docs/rule/[STANDARD]_MJ_Agent_Agent_Side_Documentation_Framework_v1.0.md` — Track B 规范
+
+#### agent + docs（Track A 文档）
+
+扫描目录（按用户聚焦点选择子集）：
+- `docs/INDEX.md` — 文档入口
+- `docs/adr/` — 决策记录（已有 ADR-000..011）
+- `docs/rule/` — STANDARD 文档（Meta_Framework / Code-Side / Agent-Side / Markdown / Commit Convention）
+- `docs/infrastructure/` — 基础设施 GUIDE（如 `git/`）
+- `docs/assessments/` — ASSESSMENT 文档
+- `docs/_templates/` — TEMPLATE_{ADR,SKILL,PROMPT,CONTRACT}.md（参考用，可不导入）
+- `docs/archive/` — 已归档（不导入，除非主题明确针对历史）
+
+> Track A 与 Track B 的文档边界详见 `docs/adr/[ADR]_012_Two_Track_Documentation_Governance.md`。
+
+#### agent + cross（全局 / 跨 track）
+
+扫描目录：
+- `CLAUDE.md` — 项目主指南（双 track 元规则）
+- `README.md`
+- `pyproject.toml` — 依赖、scope 别名、pytest/ruff 配置
+- `langgraph.json` — 编排入口
+- `.env.example` — 环境变量约定
+- `plans/` — roadmap（如 `mj-agent-roadmap-v1.6.md`）
+- `config/README.md` — secrets 管理（不导入 `secrets.enc`）
+- `.github/workflows/` — CI 配置（如有需要）
 
 ---
 
@@ -153,9 +189,9 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 
 - kebab-case（小写 + 连字符）
 - 简洁描述核心主题，1-3 单词
-- 服务名 / Agent 名可用缩写：`DQV`、`AEC`、`QVL`、`QCM`、`EmailAgent`、`PlannerAgent`
+- 服务名 / Agent 模块名可用缩写：`DQV`、`AEC`、`QVL`、`QCM`、`mj_agent`、`sql-tool`、`introspect`
 
-**示例**：`DQV`、`collection-pipeline`、`ops-etl`、`api-architecture`、`EmailAgent`、`langgraph-orchestration`、`mcp-tools`
+**示例**：`DQV`、`collection-pipeline`、`ops-etl`、`api-architecture`、`mj_agent`、`sql-introspect`、`sql-guardrail`、`system-prompt`、`adr-suite`、`code-side-framework`
 
 ---
 
@@ -184,9 +220,11 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 | `接口` | API 文档 / router 定义 | `03-接口-router定义` |
 | `技能` | SKILL.md 及支撑文件 | `15-技能-mj-doc-author` |
 | `运维` | RUNBOOK / 部署 / CI/CD | `16-运维-Docker部署手册` |
-| `Agent`（v2 新增） | Agent prompt / config | `06-Agent-EmailAgent提示词` |
-| `工具`（v2 新增） | tool / MCP 实现 | `09-工具-EmailFetchTool` |
-| `工作流`（v2 新增） | LangGraph / 编排 | `04-工作流-邮件分类管道` |
+| `Agent核心`（v2 新增） | mj-agent 主代码（agent.py / config.py / state.py / llm.py） | `02-Agent核心-make_graph` |
+| `工具`（v2 新增） | tool 实现（如 `tools/sql/{guardrail,execute,introspect}.py`） | `09-工具-sql_introspect` |
+| `Skill`（v2 新增） | Track B SKILL.md 及子文档 | `06-Skill-sql-explorer` |
+| `Prompt`（v2 新增） | Track B PROMPT 资产（含 system.md） | `07-Prompt-system_v3` |
+| `集成`（v2 新增） | integrations/（外部系统对接，如 mj_system_db.py） | `11-集成-mj_system_db` |
 
 ### 序号规则（v2 扩展）
 
@@ -197,7 +235,7 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 - 内容 source 从 `01` 开始，按导入顺序递增
 - 同类别文件序号连续（如架构 01-04，代码 05-09）
 - `99` **v2 新增**，保留给 Note 类元数据（理解度仪表盘等，不作为 Source 入库）
-- 建议排列：`导航 → 定向 → 预检 → 架构 → 接口 → 代码 → Agent → 工具 → 工作流 → 数据库 → 配置 → 规范 → 测试 → 技能 → 运维 → 自检`
+- 建议排列：`导航 → 定向 → 预检 → 架构 → 接口 → 代码 → Agent核心 → 工具 → Skill → Prompt → 集成 → 数据库 → 配置 → 规范 → 测试 → 技能 → 运维 → 自检`
 
 ---
 
@@ -224,9 +262,19 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 mj-system, system, mod, dqv, data-quality-validator, python, postgresql
 ```
 
-**单 Agent（v2 新增）**：
+**Agent 主代码包（v2 新增）**：
 ```
-mj-system, agent, agent, emailagent, email-agent, langgraph, mcp, 学习
+mj-system, agent, code, mj_agent, langchain, langgraph, python, 学习
+```
+
+**Agent 单 tool（v2 新增）**：
+```
+mj-system, agent, tool, sql-introspect, 数据边界, postgresql, 学习
+```
+
+**Agent Track A 文档（v2 新增）**：
+```
+mj-system, agent, docs, dual-track-framework, adr-suite, 架构评审
 ```
 
 **跨项目对齐（v2 新增）**：
