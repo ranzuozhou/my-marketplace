@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-05-08
+
+### 升级主旨
+
+把 v2.3 的 `mj-nlm-shared/preflight-checklist.md` 模板从文档级"应该这么做"正式编入 6 个 skill 的 Phase 0 实施段——故障检测从 v2.0/v2.1 的 Phase 7 晚发现前移到 Phase 0 早发现。**仅文档结构改动，无 MCP 调用语义变更**，非破坏性。
+
+### Changed
+
+- **build skill**：Phase 0 由 "Auth Check"（仅 server_info + refresh_auth）替换为 "Preflight Check"，含 L1 Auth Token + L2 NLM Service Health 两级 + 三 H-point (H0a/b/c) + 5min 缓存说明；workflow dot graph P0 / H1 标签同步更新
+- **manage skill**：在 `## Workflow` 之后、`## Notebook 操作` 之前插入新 `## Phase 0: Preflight Check` 段（L1 + L2，L3 由具体 CRUD 操作首次 `notebook_describe` 隐式覆盖）
+- **studio skill**：在 `### Phase 1: Notebook Locate` 之前插入新 `### Phase 0: Preflight Check` 段（L1 + L2，L3 由 Phase 1 `notebook_describe` 隐式覆盖）
+- **query skill**：在 `### Phase 1: Notebook & Mode Selection` 之前插入新 `### Phase 0: Preflight Check` 段（L1 + L2，L3 由 Phase 1 首次 `notebook_query` 隐式覆盖）
+- **learn-make wrapper**：`### Phase 0: Notebook Locate` 头部加 v2.4 隐式 Preflight 引述块（说明本 wrapper 第一个 MCP 调用 notebook_list 触发 L2，wrapper 调度的 build skill Phase 0 覆盖 L1，`--resume` 时 notebook_describe 自动覆盖 L3）
+- **learn-test wrapper**：同上格式，引述说明委托 studio / query 子 skill 完整 preflight，notebook_describe 自动覆盖 L3
+- **mj-nlm-shared/preflight-checklist.md** "## 集成点" 段 v2.3 起 → v2.3 文档化 / v2.4 实施落地；新增"v2.4 实施状态"列标记 ✅
+- **plugin.json**：2.3.0 → 2.4.0
+- **CLAUDE.md / README.md**：v2.4 顶引；其余 v2.3 / v2.2 / v2.1 / v2.0 升级要点保留为历史
+
+### Not Changed
+
+- `auth` skill — 它本身就是 NLM 认证的 troubleshooter，不应自我引用 preflight
+- shared docs（除 preflight-checklist.md 集成点状态表外）：内容稳定
+- MCP 工具调用本身：preflight 用的 `server_info` / `notebook_list` / `notebook_describe` 都是早就存在的；v2.4 仅明确文档化"在 Phase 0 调它们"
+
+### Migration（v2.3 → v2.4）
+
+无破坏性影响。用户日常调用：
+
+| 场景 | v2.3 行为 | v2.4 行为 |
+|---|---|---|
+| 调用 `/mj-nlm:build <topic>` | Phase 0 仅 server_info + refresh_auth | Phase 0 升级为 L1+L2，认证或 NLM 健康问题在 Phase 0 阻断而非 Phase 1+ |
+| 调用 `/mj-nlm:studio <nb_id>` | 无显式 Phase 0；Phase 1 隐式 notebook_list | Phase 0 显式 L1+L2 段；Phase 1 不变 |
+| 调用 `/mj-nlm:learn-make <topic>` | Phase 0 = Notebook Locate（无 preflight 文字） | Phase 0 头部加 v2.4 隐式 preflight 注解（行为不变） |
+
+### Known Issues / Roadmap
+
+- v2.5 候选：将 preflight 缓存机制（5min）从文档化升级为实际实现（需要 plugin runtime 状态层；当前是 prompt 自然语言指令）
+- v2.6 候选：NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 升级）
+- v2.x 候选：Hooks 自动检测 24h 复述提醒；移除 v1 `legacy_*` prompt 别名
+
 ## [2.3.0] - 2026-05-08
 
 ### 升级主旨
