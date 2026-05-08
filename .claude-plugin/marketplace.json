@@ -7,17 +7,17 @@
   },
   "metadata": {
     "description": "个人插件市场 — 提供知识管理、Git 工作流、插件开发等 Claude Code 插件",
-    "version": "1.6.0"
+    "version": "1.7.0"
   },
   "plugins": [
     {
       "name": "mj-nlm",
       "source": "./plugins/mj-nlm",
-      "description": "NotebookLM 学习闭环技能家族（v2.1）— mj-system + mj-agent 双项目知识工作流：认证 / 知识库构建（含领域定向报告 + 来源充足性预检）/ 生命周期管理 / 知识问答（错题 root cause + 来源核查 + 理解度自检）/ Studio 制品（学习导向 + 三版生成 + 幻觉防护，**v2.1 默认 record/online-only**）/ 学习闭环编排器（/mj-nlm:learn，**v2.1 默认 record + --with-download opt-in**）",
-      "version": "2.1.0",
+      "description": "NotebookLM 学习闭环技能家族（v2.2）— mj-system + mj-agent 双项目知识工作流；v2.2 起对外推荐两个 high-level wrapper：**/mj-nlm:learn-make**（生成学习资料：build + studio 上游 7 类制品）+ **/mj-nlm:learn-test**（生成考察资料：studio quiz/flashcards + 可选 query Mode D/E/F）；底层 6 skill（auth/build/manage/query/studio/learn[deprecated]）保留独立可调用；v2.1 record/download/both 三模式与 --with-download/--download-only 标志透传",
+      "version": "2.2.0",
       "author": { "name": "ranzuozhou" },
       "category": "productivity",
-      "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio", "learning-loop", "domain-orientation", "quiz-feedback", "source-check", "mj-system", "mj-agent", "metadata-only", "online-reference", "record-mode"],
+      "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio", "learning-loop", "domain-orientation", "quiz-feedback", "source-check", "mj-system", "mj-agent", "metadata-only", "online-reference", "record-mode", "learn-orchestration", "high-level-wrapper", "learn-make", "learn-test"],
       "license": "MIT"
     },
     {
