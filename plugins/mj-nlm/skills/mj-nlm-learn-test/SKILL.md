@@ -116,6 +116,8 @@ digraph nlm_learn_test {
 
 ### Phase 0: Notebook Locate
 
+> **v2.4 隐式 Preflight**：本 wrapper 第一个 MCP 调用 `notebook_list()` 触发 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) L2 NLM Service Health；命中 notebook 后 `notebook_describe(notebook_id)` 自动覆盖 L3；L1（token）由 wrapper 调度的 studio / query Phase 0 重新覆盖。任何 preflight 失败走对应 H0a/b/c/e/f 阻断。
+
 **目标**：定位已有 notebook，本 wrapper **不**触发 build。
 
 1. 解析启动参数：

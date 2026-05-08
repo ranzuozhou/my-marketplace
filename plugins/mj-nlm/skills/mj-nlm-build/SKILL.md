@@ -57,8 +57,8 @@ digraph nlm_build {
 
     start [label="用户: 创建 NLM 知识库", shape=doublecircle];
 
-    P0 [label="Phase 0: Auth Check"];
-    H1 [label="H1: Hard Block\n认证失败", shape=diamond, style=filled, fillcolor="#ffcccc"];
+    P0 [label="Phase 0: Preflight\n(L1 Auth + L2 NLM Health, v2.4)"];
+    H1 [label="H0a/b/c: Hard/Soft Block\n认证 or NLM 健康失败", shape=diamond, style=filled, fillcolor="#ffcccc"];
 
     P1 [label="Phase 1: Scope & Naming\nproject (system/agent/multi/intel)\n+ scope + topic + 命名"];
     H2 [label="H2: Conditional\n范围不明确", shape=diamond, style=filled, fillcolor="#ffffcc"];
@@ -116,13 +116,28 @@ digraph nlm_build {
 
 ---
 
-### Phase 0: Auth Check
+### Phase 0: Preflight Check (v2.4)
 
-**验证 NLM MCP 连通性。** 认证失败会阻断后续所有操作，必须在最前面确认。
+按 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) 执行 L1 + L2（build skill 不需要 L3 — `notebook_id` 在 Phase 1 才创建）。**任何 preflight 失败都必须前移阻断**——避免用户走完一半才命中认证 / 服务问题。
 
-1. 调用 `server_info()` 检查 MCP 服务状态
-2. 若失败 → 调用 `refresh_auth()` 刷新 token
-3. 仍失败 → **H1** 阻断
+#### L1: Auth Token
+
+调用 `server_info()` 检查 MCP 服务 + token 状态。
+- 通过 → 进 L2
+- **H0a**（Hard Block）：失败 → 引导 `/mj-nlm:auth`（按 auth troubleshooting 修复，不自动尝试 refresh，避免吞掉用户应该看到的认证错误）
+
+#### L2: NLM Service Health
+
+调用 `notebook_list()` 检查列权限。
+- 通过（200 + array，即使空数组）→ 进 Phase 1
+- **H0b**（Hard Block）：`PERMISSION_DENIED` → `/mj-nlm:auth`（典型 token scope 问题）
+- **H0c**（Soft Warn）：其他错误 → 报原始错误，让用户判断是否继续
+
+#### 缓存
+
+5 分钟内同会话同 skill 已通过 L1+L2 → 跳过本 Phase。用户传 `--force-recheck` 时强制重跑。
+
+通过条件：L1 + L2 全 OK → 进 Phase 1 Scope & Naming。
 
 ---
 

@@ -107,6 +107,8 @@ digraph nlm_learn_make {
 
 ### Phase 0: Notebook Locate
 
+> **v2.4 隐式 Preflight**：本 wrapper 第一个 MCP 调用 `notebook_list()` 同时触发 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) L2 NLM Service Health；token 检查 (L1) 在 wrapper 调度的 build skill Phase 0 内重新覆盖。任何 L1/L2 失败按 build / studio 各自的 H0a/b/c 处理。`--resume <notebook_id>` 时由 `notebook_describe(notebook_id)` 自动覆盖 L3。
+
 **目标**：定位 topic 对应的 notebook，决定是否进入 Phase 1 (build)。
 
 1. 解析启动参数：

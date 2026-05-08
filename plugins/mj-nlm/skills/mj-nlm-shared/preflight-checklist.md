@@ -64,17 +64,17 @@ preflight 把"硬故障检测"前移到 Phase 0：花 ~5 秒确认 token + MCP �
 
 ---
 
-## 集成点（v2.3 起）
+## 集成点（v2.3 文档化 / v2.4 实施落地）
 
-| Skill | 触发位置 | 默认级别 |
-|---|---|---|
-| `mj-nlm:auth` | 已有完整自查流程，不需 preflight | — |
-| `mj-nlm:build` | Phase 0（替代原 Auth Check） | L1 + L2 |
-| `mj-nlm:manage` | Phase 0 | L1 + L2 |
-| `mj-nlm:query` | Phase 0；若入参带 notebook_id 加 L3 | L1 + L2 + (L3 条件) |
-| `mj-nlm:studio` | Phase 0；入参带 notebook_id 加 L3 | L1 + L2 + L3 |
-| `mj-nlm:learn-make` | Phase 0；`--resume` 加 L3 | L1 + L2 + (L3 条件) |
-| `mj-nlm:learn-test` | Phase 0；总有 notebook_id 入参 | L1 + L2 + L3 |
+| Skill | 触发位置 | 默认级别 | v2.4 实施状态 |
+|---|---|---|---|
+| `mj-nlm:auth` | 已有完整自查流程，不需 preflight | — | — |
+| `mj-nlm:build` | Phase 0（替代原 Auth Check） | L1 + L2 | ✅ 显式 Phase 0 段 + 三 H-point (H0a/b/c) |
+| `mj-nlm:manage` | Phase 0（Workflow 后插入） | L1 + L2 | ✅ 显式 Phase 0 段 |
+| `mj-nlm:query` | Phase 0；L3 由 Phase 1 首次 query 隐式覆盖 | L1 + L2 + (L3 条件) | ✅ 显式 Phase 0 段 |
+| `mj-nlm:studio` | Phase 0；L3 由 Phase 1 `notebook_describe` 隐式覆盖 | L1 + L2 + L3 | ✅ 显式 Phase 0 段 |
+| `mj-nlm:learn-make` | Phase 0 Notebook Locate 前置注解（隐式 preflight） | L1 + L2 + (L3 条件) | ✅ 注解 + 委托 build/studio 子 skill 完整 preflight |
+| `mj-nlm:learn-test` | Phase 0 Notebook Locate 前置注解（隐式 preflight） | L1 + L2 + L3 | ✅ 注解 + 委托 studio/query 子 skill 完整 preflight |
 
 ---
 
