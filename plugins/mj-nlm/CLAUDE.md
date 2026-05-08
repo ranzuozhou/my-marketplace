@@ -4,6 +4,13 @@
 
 mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）的 NotebookLM 学习闭环技能家族 Plugin。
 
+**v2.4 升级要点**（preflight 实施落地，**非破坏性**）：
+- v2.3 的 `mj-nlm-shared/preflight-checklist.md` 由文档级模板正式编入 6 个 skill 的 Phase 0 实施段：
+  - `build` / `manage` / `query` / `studio` 4 底层 skill 显式 Phase 0 + H0a/b/c 段
+  - `learn-make` / `learn-test` 2 wrapper Phase 0 加隐式 preflight 注解，委托子 skill 完整 preflight
+- `auth` skill 不动（自身就是 troubleshooter）
+- 仅文档结构改动，无 MCP 调用语义变更；用户体验上：故障从 Phase 7 后移晚发现 → Phase 0 早发现
+
 **v2.3 升级要点**（deprecation removal + 启动规范，**轻量 BREAKING 已经过 v2.2 公告期**）：
 - 删除 `/mj-nlm:learn` skill（v2.0 引入，v2.2 deprecated）；改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联
 - 新增 2 份共享规范：
