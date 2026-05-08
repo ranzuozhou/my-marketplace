@@ -5,6 +5,35 @@
 
 ## [Unreleased]
 
+## [1.9.1] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.4.1 patch — 诚实化 v2.4 cache 描述。调研 `notebooklm-mcp-cli` v0.6.5 源码后确认：v2.4 SKILL.md 与 preflight-checklist.md 写的"5min TTL 缓存 + 内存级 dict"实际是 Claude conversation 自然 memory，不是技术 cache。本 patch 重写相关段落 + 沉淀 v2.5 候选 abandoned 决策依据。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.9.0 → 1.9.1** | mj-nlm patch bump |
+| **mj-nlm** | **2.4.0 → 2.4.1** | **patch**：cache 描述诚实化 + v2.5 候选 abandoned 沉淀 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.4.0 → v2.4.1
+
+- **mj-nlm-shared/preflight-checklist.md §缓存策略** 重写：v2.4.1 诚实化段含实际机制（同 turn LLM memory / 跨 turn 重跑）+ 单调用真实开销表 + v2.5 候选 abandoned 4 条决策依据
+- **build / manage / studio / query** 4 个 skill Phase 0 缓存段统一改为引述 preflight-checklist §缓存策略
+- 删除 `--force-recheck` flag 引用（从未实现）
+
+### v2.5 Roadmap 更新（abandoned + 重排）
+
+- ~~v2.5 候选：preflight 5min 缓存机制升级为真实现~~ → **abandoned**（v2.4.1 调研发现 ROI 低）
+- v2.5 重命名为：NLM artifact-level URL 暴露调研（之前 v2.6 候选）
+- 详见 `plugins/mj-nlm/CHANGELOG.md#[2.4.1]` § Roadmap 更新
+
 ## [1.9.0] - 2026-05-08
 
 ### Highlights

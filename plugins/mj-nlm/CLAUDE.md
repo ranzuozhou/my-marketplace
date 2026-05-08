@@ -4,6 +4,12 @@
 
 mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）的 NotebookLM 学习闭环技能家族 Plugin。
 
+**v2.4.1 升级要点**（cache 描述诚实化 patch，**非破坏性**）：
+- v2.4 SKILL.md 与 preflight-checklist.md 写的"5min TTL 缓存"实际是 Claude conversation 自然 memory，不是技术 cache
+- 调研 `notebooklm-mcp-cli` v0.6.5 源码：`server_info` / `refresh_auth` 是 LOCAL check（毫秒级），`notebook_list` 是真网络（1-3 秒，但缓存它会让刚建/刚删 notebook 反映不准）
+- v2.4.1 重写 5 处 cache 段为诚实描述（同 turn LLM memory / 跨 turn 重跑）；删除从未实现的 `--force-recheck` flag 引用
+- ~~v2.5 候选~~ preflight 5min 缓存升级为真实现：**abandoned**（ROI 低）
+
 **v2.4 升级要点**（preflight 实施落地，**非破坏性**）：
 - v2.3 的 `mj-nlm-shared/preflight-checklist.md` 由文档级模板正式编入 6 个 skill 的 Phase 0 实施段：
   - `build` / `manage` / `query` / `studio` 4 底层 skill 显式 Phase 0 + H0a/b/c 段

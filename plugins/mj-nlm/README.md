@@ -1,5 +1,7 @@
 # mj-nlm — NotebookLM Learning-Loop Plugin for Claude Code
 
+> **v2.4.1 — Cache 描述诚实化 patch**：v2.4 SKILL.md 写的"5min TTL 缓存"实际是 Claude conversation 自然 memory（同 turn 不重复跑 / 跨 turn 重跑）。调研 `notebooklm-mcp-cli` v0.6.5 源码后确认 `server_info` / `refresh_auth` 是 LOCAL（毫秒级），仅 `notebook_list` 是网络（1-3 秒）；真实现 5min cache ROI 低，**v2.5 候选 abandoned**。本 patch 重写 5 处 cache 段为诚实描述。
+>
 > **v2.4 — Preflight 实施落地**：v2.3 的 `preflight-checklist.md` 模板正式编入 6 个 skill 的 Phase 0 实施段（build / manage / query / studio 显式 Phase 0 + H0a/b/c；learn-make / learn-test wrapper 加隐式 preflight 注解委托子 skill）。auth skill 不动。仅文档结构改动，**非破坏性**；故障从 Phase 7 后移晚发现 → Phase 0 早发现。
 >
 > **v2.3 — Deprecation removal + 启动规范**：移除 v2.2 forward-announce 的 `/mj-nlm:learn` skill；新增 2 份共享规范 `preflight-checklist.md`（启动冒烟三级 L1 Auth / L2 MCP health / L3 Notebook scope）+ `quota-estimation.md`（单调用基线 + 双 wrapper 配额预告）。skill 数 8 → 7；shared 文档 8 → 10。**轻量 BREAKING（v2.2 已公告期 ~2 周）**。
@@ -240,9 +242,12 @@ wrapper 2 引导你：
 - ✅ v2.1：默认 record mode（全在线 + 元信息 markdown），二进制 download 降级为 opt-in
 - ✅ v2.2：高层入口整合（`/mj-nlm:learn-make` + `/mj-nlm:learn-test`），旧 `/mj-nlm:learn` 标 deprecated
 - ✅ v2.3：移除 v2.2 deprecated 的 `/mj-nlm:learn` skill；新增 preflight-checklist + quota-estimation 两份共享规范
-- v2.4：将 preflight L1+L2 实际编进各 skill Phase 0 实施代码（v2.3 仅文档化）；NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 升级）
-- v2.5：Hooks 自动检测过期 24h 复述提醒 + marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
-- v2.6：移除 v1 `legacy_*` prompt 别名
+- ✅ v2.4：将 preflight L1+L2 实际编进 6 个 skill 的 Phase 0 实施段（build / manage / studio / query 显式 + learn-make / learn-test 隐式注解；auth 不动）
+- ✅ v2.4.1：诚实化 v2.4 cache 描述（同 turn LLM 自然 memory / 跨 turn 重跑），沉淀 v2.5 候选 abandoned 决策
+- ~~v2.5 candidate~~ — preflight 5min 缓存机制升级为真实现：**abandoned**（v2.4.1 调研发现 ROI 低；详见 CHANGELOG [2.4.1]）
+- v2.5：NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 若 NLM 暴露则升级）
+- v2.6：Hooks 自动检测过期 24h 复述提醒 + marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
+- v2.7：移除 v1 `legacy_*` prompt 别名
 - v2.x：英文 prompt 模板支持（v2.0 仅中文）；按需评估独立 mj-nlm-record skill（用于历史 artifact 补录）
 
 ## 许可

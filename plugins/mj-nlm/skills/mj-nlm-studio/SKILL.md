@@ -119,7 +119,7 @@ digraph nlm_studio {
 1. **L1 Auth Token** — `server_info()` → 失败走 **H0a** 引导 `/mj-nlm:auth`
 2. **L2 NLM Service Health** — `notebook_list()` → `PERMISSION_DENIED` 走 **H0b** `/mj-nlm:auth`；其他错误走 **H0c** soft warn
 
-**缓存**：5 min 内同会话同 skill 已通过 L1+L2 → 跳过本 Phase（`--force-recheck` 重跑）。
+**缓存（v2.4.1 诚实化）**：依赖 Claude conversation 自然 memory（同 turn 不重复跑）；跨 turn 重新执行（毫秒级 + 1-3 秒可接受）。详见 `../mj-nlm-shared/preflight-checklist.md#缓存策略`。
 
 通过条件：L1 + L2 全 OK → 进 Phase 1 Notebook Locate。
 
