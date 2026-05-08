@@ -52,15 +52,33 @@ preflight 把"硬故障检测"前移到 Phase 0：花 ~5 秒确认 token + MCP �
 
 ---
 
-## 缓存策略
+## 缓存策略（v2.4.1 诚实化）
 
-> 防止重复 preflight 在同一会话拖累用户体验。
+> v2.4 设计文档原本写"5min TTL 缓存 + 内存级 dict"——v2.4.1 调研后确认这是 Claude conversation 自然 memory，不是真实现的技术 cache。本节澄清实际机制与单调用真实开销。
 
-- **Auth 状态**：5 分钟内只跑一次 Level 1+2；后续 skill 调用复用结果（前提：用户没主动跑 `/mj-nlm:auth` 切账号）
-- **Notebook 状态**：仅当 `notebook_id` 改变时重跑 Level 3
-- **强制重跑**：用户显式传 `--preflight` 或 `--force-recheck` flag → 跳过缓存
+### 实际机制
 
-实现层面，缓存用一个内存级 dict 即可（`{auth_status: ts, notebook_id: {state, ts}}`），不需要持久化。
+- **同 turn 内**：Claude 已知刚跑过 preflight，不会重复跑（自然 LLM behavior，无需 prompt 强制）
+- **跨 turn / 跨 skill 调用**：preflight 重新执行；用户在 Claude Code 一个 session 内多次调用 `/mj-nlm:learn-make` / `/mj-nlm:build` 等，每次进 Phase 0 都会重跑一次
+
+### 单调用真实开销（v2.4.1 调研结论）
+
+| 工具 | 性质 | 中位耗时 | 缓存价值 |
+|---|---|---|---|
+| `server_info` | LOCAL check（不发 Google API） | 毫秒级 | 极低 |
+| `refresh_auth` | disk reload（仅 Chrome headless 触发时慢） | 毫秒级（命中 disk） | 极低 |
+| `notebook_list` | live Google API | 1-3 秒 | 中等，但有副作用 |
+
+**为什么不实现真 5min TTL 缓存**（v2.5 候选 abandoned 决策记录）：
+
+1. server_info / refresh_auth 真实开销可忽略，缓存收益≈0
+2. notebook_list 真有开销，但它是用户**日常 API**（不只用于 preflight）；缓存它会让刚建/刚删的 notebook 反映不准确，副作用大于收益
+3. 真实现需要 fork [`notebooklm-mcp-cli`](https://github.com/jacob-bd/notebooklm-mcp-cli)（v0.6.5，活跃开发）+ 加 cache 层 + 维护 fork——长尾成本高
+4. 跨 turn 重跑的实际用户体验影响小：notebook_list 1-3 秒 + L1/L2 毫秒级 = 单次 ≤ 4 秒；wrapper 总耗时本来就在 12-40 分钟量级
+
+### 强制重跑
+
+由于不存在技术 cache，无需 `--force-recheck` flag——跨 turn 自动重跑。同 turn 内若用户切了账号（`nlm login switch`），调一次 `/mj-nlm:auth` 即可在 Claude conversation 中刷新认知。
 
 ---
 

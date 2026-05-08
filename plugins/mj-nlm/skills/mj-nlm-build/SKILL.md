@@ -133,9 +133,9 @@ digraph nlm_build {
 - **H0b**（Hard Block）：`PERMISSION_DENIED` → `/mj-nlm:auth`（典型 token scope 问题）
 - **H0c**（Soft Warn）：其他错误 → 报原始错误，让用户判断是否继续
 
-#### 缓存
+#### 缓存（v2.4.1 诚实化）
 
-5 分钟内同会话同 skill 已通过 L1+L2 → 跳过本 Phase。用户传 `--force-recheck` 时强制重跑。
+依赖 Claude conversation 自然 memory：同 turn 内 Claude 不会重复跑刚跑过的 preflight。跨 turn 调用 skill 会重新执行——开销可忽略：`server_info` / `refresh_auth` 是 LOCAL check（毫秒级），仅 `notebook_list` 是网络调用（1-3 秒）。详见 [`../mj-nlm-shared/preflight-checklist.md#缓存策略`](../mj-nlm-shared/preflight-checklist.md#缓存策略)。
 
 通过条件：L1 + L2 全 OK → 进 Phase 1 Scope & Naming。
 
