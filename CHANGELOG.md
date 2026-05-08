@@ -5,6 +5,50 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.2 minor bump — 高层入口整合：新增 `/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）两个 high-level wrapper；旧 `/mj-nlm:learn` 标 deprecated（v2.3 删除）。用户对外只需记 2 个命令，底层 6 skill 仍可独立调用。**非破坏性 UX 优化**。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.6.0 → 1.7.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.1.0 → 2.2.0** | **minor bump**：2 新 wrapper skill (learn-make / learn-test) + learn deprecated + 元数据同步 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.1.0 → v2.2.0
+
+- **新增 2 wrapper skill**：
+  - `mj-nlm-learn-make`：编排 build + studio 上游 7 类制品（mind_map/video/slide/audio/report/infographic/data_table），4 Phase + 4 H-points；启动标志 `<topic>` / `--resume` / `--triple-view` / `--with-download` / `--download-only`
+  - `mj-nlm-learn-test`：编排 studio quiz/flashcards + 可选 query Mode D/E/F，3 Phase（含 4 子分支）+ 5 H-points；启动标志 `<nb_id>` / `--full` / `--rootcause` / `--selfcheck` / `--sourcecheck`
+- **mj-nlm-learn 标 deprecated**：frontmatter `[DEPRECATED v2.2]` 前缀；body 顶加完整 Phase 对照迁移段；保留至 v2.3 删除
+- **plugin.json**：2.1.0 → 2.2.0；description 加 v2.2 高层入口；keywords +`learn-orchestration` / `high-level-wrapper` / `learn-make` / `learn-test`
+- **CLAUDE.md / README.md**：6 skill 表 → 8 skill 表（拆 high-level wrapper + 底层）；新增 v2.2 升级要点段；自然语言触发段加 wrapper 触发词
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.2.0]`。
+
+### Deprecated
+
+- mj-nlm `/mj-nlm:learn` skill — v2.3 计划删除（约 2-3 周观察期），由 wrapper 1+2 串联替代
+
+### Migration
+
+| v2.1 入口 | v2.2 替代 |
+|---|---|
+| `/mj-nlm:learn <topic>` | `/mj-nlm:learn-make <topic>` → `/mj-nlm:learn-test <nb_id>` |
+| `/mj-nlm:learn --triple-view` | `/mj-nlm:learn-make --triple-view` |
+| `/mj-nlm:learn --with-download` | `/mj-nlm:learn-make --with-download` |
+| `/mj-nlm:learn --resume <nb_id>` | `/mj-nlm:learn-make --resume <nb_id>`（共享 `learn-phase:G{N}-passed` tag） |
+| `/mj-nlm:learn --quiz-only` | `/mj-nlm:learn-test <nb_id>`（默认即等价） |
+
+底层 `/mj-nlm:auth` / `/mj-nlm:build` / `/mj-nlm:manage` / `/mj-nlm:query` / `/mj-nlm:studio` 完全不动，独立可调路径全保留。
+
 ## [1.6.0] - 2026-05-08
 
 ### Highlights

@@ -1,6 +1,8 @@
 ---
 name: learn
 description: >
+  [DEPRECATED v2.2 — use /mj-nlm:learn-make + /mj-nlm:learn-test 串联替代;
+  本 skill 保留至 v2.3 删除，仅供 v2.0/v2.1 既有用户继续使用]
   MUST be used when the user wants end-to-end orchestration of build + studio + query
   to walk through the full 10-phase + 5-gate NotebookLM learning loop (来源准备 → 领域定向 →
   Mind Map → Video → Slide → Audio → Quiz → 错题 root cause → 来源核查 → 理解度仪表盘).
@@ -20,6 +22,30 @@ description: >
 ---
 
 # mj-nlm:learn
+
+> ⚠️ **v2.2 DEPRECATED — 请改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联**
+>
+> v2.2 把单一编排器拆为「学习侧」（learn-make）+「考察侧」（learn-test）双 wrapper。本 skill 保留至 v2.3 删除，仅供既有 v2.0/v2.1 用户在迁移期内继续使用。
+>
+> **迁移对照表**：
+>
+> | v2.1 learn 阶段 | v2.2 替代 |
+> |---|---|
+> | Phase 0-1（来源准备 + build） | `/mj-nlm:learn-make <topic>` 内置 Phase 1 (build 条件触发) |
+> | Gate 1（00c 审定） | 下沉到 build skill Phase 7 H-point |
+> | Phase 2-5（mind_map / video / slide / audio） | `/mj-nlm:learn-make` Phase 2 多选 + Phase 3 循环 |
+> | Phase 6（quiz + flashcards） | `/mj-nlm:learn-test <nb_id>` Phase 2a（默认锁定） |
+> | Phase 7（Mode D 错题归因） | `/mj-nlm:learn-test --rootcause <nb_id>` 或 Phase 1 勾选 |
+> | Phase 8（Mode F 自检） | `/mj-nlm:learn-test --selfcheck <nb_id>` 或 Phase 1 勾选 |
+> | Phase 9（Mode E 来源核查） | `/mj-nlm:learn-test --sourcecheck <nb_id>` 或 Phase 1 勾选 |
+> | `--triple-view` | `/mj-nlm:learn-make --triple-view <topic>` |
+> | `--with-download` / `--download-only` | 同名标志，wrapper 1/2 均支持透传 |
+> | `--resume <nb_id>` | `/mj-nlm:learn-make --resume <nb_id>`（兼容旧 `learn-phase:G{N}-passed` tag） |
+> | `--lite` / `--quiz-only` | wrapper 1 不选 video / wrapper 2 默认即等价 |
+>
+> **完整 v2.2 替代流程**：`/mj-nlm:learn-make <topic>` → notebook + 学习资料 → `/mj-nlm:learn-test <nb_id>` → 考察资料 + 自检
+>
+> 以下原 v2.0/v2.1 文档保持不变，供既有用户参考。
 
 ## Overview
 
