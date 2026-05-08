@@ -5,6 +5,34 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.3 minor bump — deprecation removal + preflight & quota 共享规范：完成 v2.2 forward-announce 的 `/mj-nlm:learn` skill 移除；新增 `mj-nlm-shared/preflight-checklist.md` + `mj-nlm-shared/quota-estimation.md` 两份共享规范，把 NLM 启动冒烟检查（auth / MCP / notebook scope）和耗时配额预告（双 wrapper + 底层 skill）前移到 Phase 0，缓解 v2.0/v2.1 学习闭环卡 Phase 7 的根因 + 用户对耗时无预期 两个 UX 痛点。**轻量 BREAKING（已经过 v2.2 ~2 周公告期）**。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.7.0 → 1.8.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.2.0 → 2.3.0** | **minor bump**：删除 deprecated learn skill + 2 新 shared 文档（preflight + quota） |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.2.0 → v2.3.0
+
+- **删除 `mj-nlm-learn/` skill**（v2.2 forward-announce 完成）；所有调用改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联
+- **新增 2 shared 文档**：`mj-nlm-shared/preflight-checklist.md`（启动冒烟三级 checklist + 5min 缓存）+ `mj-nlm-shared/quota-estimation.md`（单调用基线 + 双 wrapper 配额预告 + NLM 配额上限）
+- **risk-control-templates.md §6** 抽出 → quota-estimation.md（保留单行 stub）
+- **build / studio / query / learn-make / learn-test / 2 shared docs** 内全部 `/mj-nlm:learn` 引用改为 wrapper 双命令
+- **plugin.json / marketplace.json description** 同步删除 `learn[deprecated]` 标识，加 v2.3 preflight/quota 说明；keywords +`preflight` / `quota-estimation`
+- **CLAUDE.md / README.md**：v2.3 升级要点段；8 skill → 7 skill 表；shared 8 → 10 份；roadmap v2.3 ✅；v2.4-v2.6 重排
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.3.0]`。
+
 ## [1.7.0] - 2026-05-08
 
 ### Highlights

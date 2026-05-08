@@ -29,7 +29,7 @@ description: >
 | **E: Source Check**（v2 新） | v2 | 关键结论可追溯性核查 |
 | **F: Understanding Self-Check**（v2 新） | v2 | 7 项理解度量化指标自检 |
 
-**前置 skill**：知识库构建使用 `/mj-nlm:build`；制品生成使用 `/mj-nlm:studio`；学习闭环编排使用 `/mj-nlm:learn`。
+**前置 skill**：知识库构建使用 `/mj-nlm:build`；制品生成使用 `/mj-nlm:studio`；生成学习资料编排使用 `/mj-nlm:learn-make`；生成考察资料编排使用 `/mj-nlm:learn-test`。
 
 ## Prerequisites
 
@@ -240,8 +240,8 @@ prompt 详见 `→ ../mj-nlm-shared/learning-loop-templates.md#§3`。
 
 skill 在结果末尾建议：
 - 重生成针对性制品（call `/mj-nlm:studio` 用建议的 prompt）
-- 重做 quiz（生成新一组 quiz 验证已学）
-- 回到 `/mj-nlm:learn` 重启闭环（如多个错题指向同一概念）
+- 重做 quiz（call `/mj-nlm:learn-test --rootcause <nb_id>` 生成新一组 quiz 验证已学）
+- 回到 `/mj-nlm:learn-make` 重新生成学习资料（如多个错题指向同一概念，需重做 mind_map / video / slide）
 
 ---
 
@@ -316,7 +316,7 @@ prompt 详见 `→ ../mj-nlm-shared/risk-control-templates.md#4` + `learning-loo
 
 **写 Note 责任边界**：
 - 用户**直接**调用 `/mj-nlm:query --mode=self-check` → 由 query 写 Note
-- 通过 `/mj-nlm:learn` 编排（learn 的 Phase 8）调用 → query 仅返回结构化结果（dict / JSON），由 learn 统一汇总并写 Note（避免双写）
+- 通过 `/mj-nlm:learn-test` wrapper 编排（Phase 2c 自检分支）调用 → query 仅返回结构化结果（dict / JSON），由 learn-test 统一汇总并写 Note（避免双写）
 - query 通过环境标识 `LEARN_ORCHESTRATED=1` 或显式参数 `--no-write-note` 区分两种调用
 
 #### 24h 回访（指标 7）

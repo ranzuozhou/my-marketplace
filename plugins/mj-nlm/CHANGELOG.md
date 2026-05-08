@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-05-08
+
+### 升级主旨
+
+完成 v2.2 forward-announce 的 deprecation removal：移除 `/mj-nlm:learn` skill（v2.0 引入 / v2.2 deprecated）；新增 `mj-nlm-shared/preflight-checklist.md` + `mj-nlm-shared/quota-estimation.md` 两份共享规范，把 v2.0/v2.1 学习闭环卡 Phase 7 的根因（认证 / scope 故障晚发现）+ 用户对耗时无预期 两个 UX 痛点前移到 Phase 0。**轻量 BREAKING（已经过 v2.2 ~2 周公告期）**。
+
+### Removed
+
+- **`mj-nlm-learn/` skill**（连同 SKILL.md 整个目录）— v2.0 引入的单一编排器；v2.2 起 deprecated；v2.3 完整移除。所有调用应改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联（v2.2 已上线）。
+
+### Added
+
+- **共享文档 `mj-nlm-shared/preflight-checklist.md`**：NLM 启动冒烟三级 checklist —— L1 Auth Token（refresh_auth status） / L2 NLM Service Health（server_info + notebook_list） / L3 Notebook scope（notebook_describe + 可选 notebook_query），含 5min 缓存策略 + 集成点 + H-point 模板供各 skill Phase 0 嵌入
+- **共享文档 `mj-nlm-shared/quota-estimation.md`**：单调用耗时基线（一次性 / per-source / per-artifact 三类） + 双 wrapper（learn-make / learn-test）配额预告 + build / studio / query 单步耗时 + NotebookLM 公开+经验配额上限（含 source 上限 / studio rate / query rate / 文件大小限）+ 总耗时报告模板（用于 Phase 0 输出）
+- **build / learn-make / learn-test SKILL.md Reference 段** 加新两 shared 文档引用
+
+### Changed
+
+- **mj-nlm-shared/risk-control-templates.md §6** 抽出 → quota-estimation.md（risk-control 保留单行 stub 指向新文件，扩展为双 wrapper 口径）
+- **build skill description 反向触发约束** 由「`/mj-nlm:learn`」改为「`/mj-nlm:learn-make`」+「`/mj-nlm:learn-test`」拆两条
+- **studio / query SKILL.md** 内所有 `/mj-nlm:learn` 引用改为 wrapper 双命令（含 query Mode F 的 LEARN_ORCHESTRATED 边界说明改为 learn-test wrapper Phase 2c）
+- **shared/artifact-metadata-template.md** "何时由谁写"表 + **shared/naming-reference.md** `learn-loop` tag 表 同步改为 wrapper 命令
+- **plugin.json**：2.2.0 → 2.3.0；description 删除「learn[deprecated]」标识，改为「底层 5 skill」+ v2.3 preflight/quota 注释；keywords +`preflight` / `quota-estimation`
+- **CLAUDE.md / README.md**：v2.3 升级要点段；8 skill → 7 skill 表（删 learn）；shared 8 份 → 10 份（preflight + quota）；roadmap v2.3 标 ✅；v2.4-v2.6 重排
+- **README.md** 中「学习闭环编排器 `/mj-nlm:learn`（v2.2 deprecated）」整段删除；新增「v2.3 核心新概念」段；"单步使用 advanced" 表删 `/mj-nlm:learn` 行
+
+### Migration（v2.2 → v2.3）
+
+无破坏性影响——v2.2 已 forward-announce，所有正常用户在 v2.2 阶段已迁移到 wrapper。
+
+| v2.2 状态 | v2.3 行为 |
+|---|---|
+| 用户调 `/mj-nlm:learn` | skill 已不存在 → Claude Code 报 unknown skill；改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` |
+| 调 `/mj-nlm:learn --resume <nb_id>` | 改用 `/mj-nlm:learn-make --resume <nb_id>`（共享 `learn-phase:G{N}-passed` tag） |
+| Claude 引擎自动选 `/mj-nlm:learn` | 已删除，引擎自动改选 wrapper（learn-make 与 learn-test 的 description 已涵盖原 learn 触发关键词） |
+
+### Known Issues / Roadmap
+
+- v2.4 候选：将 preflight-checklist L1+L2 实际编进各 skill Phase 0 实施代码（v2.3 仅文档化 H-point 模板）；NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 若 NLM 暴露则升级）
+- v2.5 候选：Hooks 自动检测过期 24h 复述提醒
+- v2.6 候选：移除 v1 `legacy_*` prompt 别名
+
 ## [2.2.0] - 2026-05-08
 
 ### 升级主旨

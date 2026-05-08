@@ -1,0 +1,113 @@
+# NLM Preflight Checklist — 启动冒烟检查（v2.3）
+
+> mj-nlm 任何一个 skill 在 Phase 0 进入业务流程前都应跑一次轻量 preflight，避免用户走完一半才命中认证 / 服务问题。
+>
+> v2.3 把这套 checklist 显式化，统一规范"什么算可以推进 Phase 1"。
+
+## 目的
+
+mj-nlm 的子 skill 大多耗时长（build 含 source 导入；studio 制品 30s-3min；wrapper 一次跑 7+ 调用）。**任何在 Phase 0 没发现的故障，都会在用户已等了 1-10 分钟后才暴露**——这是 v2.0/v2.1 学习闭环卡 Phase 7 的根因。
+
+preflight 把"硬故障检测"前移到 Phase 0：花 ~5 秒确认 token + MCP 健康，再决定是否进 Phase 1。
+
+## 三级 Preflight
+
+### Level 1 — Auth Token（强制，所有 skill）
+
+| 检查 | 命令 | 通过条件 |
+|---|---|---|
+| Token 状态 | `mj-nlm-mcp__refresh_auth()` 等价的 status 调用 | 返回 OK；token 未过期 |
+
+失败处理：
+- 立即退出，引导 `/mj-nlm:auth`（按 auth skill troubleshooting 修复）
+- **不**自动尝试 refresh（避免吞掉用户应该看到的认证错误）
+
+### Level 2 — NLM Service Health（强制，所有 skill）
+
+| 检查 | 命令 | 通过条件 |
+|---|---|---|
+| MCP 进程在跑 | `mj-nlm-mcp__server_info()` | 返回 server metadata |
+| 列 notebook 权限可用 | `mj-nlm-mcp__notebook_list()` | 返回 200 + notebook 数组（即使空数组也算通过） |
+
+失败处理：
+- `server_info` 失败 → 提示用户重启 MCP（`uv tool reinstall notebooklm-mcp-cli` 或 `nlm login`）
+- `notebook_list` PERMISSION_DENIED → 引导 `/mj-nlm:auth`
+- `notebook_list` 其他错误 → 报告原始错误，让用户判断
+
+### Level 3 — Notebook-scoped Health（条件，仅当 skill 已知 notebook_id）
+
+| 检查 | 命令 | 通过条件 |
+|---|---|---|
+| 该 notebook 可读 | `mj-nlm-mcp__notebook_describe(notebook_id)` | 返回 notebook metadata |
+| query 权限可用（高敏感场景） | `mj-nlm-mcp__notebook_query(notebook_id, "ping")` 或类似 noop | 返回 ≥1 字符串响应（不关心内容） |
+
+失败处理：
+- notebook_describe NOT_FOUND → 让用户确认 notebook_id；可能是用户记错或 notebook 被删
+- notebook_query PERMISSION_DENIED → 这是 v2.0 学习闭环卡 Phase 7 的典型故障；走 `/mj-nlm:auth` 重新认证
+
+**何时触发 Level 3**：
+- `learn-make --resume <notebook_id>`（必须确认 resume 目标可达）
+- `learn-test <notebook_id>`（必须确认 quiz 调度对象可达）
+- query / studio / manage 直接传 notebook_id 入参时（已有现行 Phase 0 逻辑覆盖，本 checklist 是规范化）
+
+---
+
+## 缓存策略
+
+> 防止重复 preflight 在同一会话拖累用户体验。
+
+- **Auth 状态**：5 分钟内只跑一次 Level 1+2；后续 skill 调用复用结果（前提：用户没主动跑 `/mj-nlm:auth` 切账号）
+- **Notebook 状态**：仅当 `notebook_id` 改变时重跑 Level 3
+- **强制重跑**：用户显式传 `--preflight` 或 `--force-recheck` flag → 跳过缓存
+
+实现层面，缓存用一个内存级 dict 即可（`{auth_status: ts, notebook_id: {state, ts}}`），不需要持久化。
+
+---
+
+## 集成点（v2.3 起）
+
+| Skill | 触发位置 | 默认级别 |
+|---|---|---|
+| `mj-nlm:auth` | 已有完整自查流程，不需 preflight | — |
+| `mj-nlm:build` | Phase 0（替代原 Auth Check） | L1 + L2 |
+| `mj-nlm:manage` | Phase 0 | L1 + L2 |
+| `mj-nlm:query` | Phase 0；若入参带 notebook_id 加 L3 | L1 + L2 + (L3 条件) |
+| `mj-nlm:studio` | Phase 0；入参带 notebook_id 加 L3 | L1 + L2 + L3 |
+| `mj-nlm:learn-make` | Phase 0；`--resume` 加 L3 | L1 + L2 + (L3 条件) |
+| `mj-nlm:learn-test` | Phase 0；总有 notebook_id 入参 | L1 + L2 + L3 |
+
+---
+
+## H-Point 模板（嵌入各 skill 的 Phase 0）
+
+```markdown
+### Phase 0: Preflight Check
+
+| Level | 检查 | 工具 | 期望 |
+|---|---|---|---|
+| L1 | Auth token | refresh_auth status | OK |
+| L2a | MCP server | server_info | metadata |
+| L2b | Notebook list | notebook_list | 200 + array |
+| L3* | Notebook reachable | notebook_describe(<id>) | metadata |
+| L3* | Query permission | notebook_query(<id>, ping) | response |
+
+*L3 仅当 skill 入参带 notebook_id 时触发。
+
+| H | 触发 | 行为 |
+|---|---|---|
+| **H0a** | L1 fail | Hard block → `/mj-nlm:auth` |
+| **H0b** | L2a fail | Hard block → 用户重启 MCP |
+| **H0c** | L2b PERMISSION_DENIED | Hard block → `/mj-nlm:auth` |
+| **H0d** | L2b 其他错误 | Soft warn → 报错 + 用户判断是否继续 |
+| **H0e** | L3 NOT_FOUND | Hard block → 用户确认 notebook_id |
+| **H0f** | L3 PERMISSION_DENIED | Hard block → `/mj-nlm:auth`（典型 token scope 问题） |
+
+通过条件：L1 + L2 全 OK，L3（如触发）也 OK → 进 Phase 1。
+```
+
+---
+
+## Reference
+
+- `→ ../mj-nlm-auth/SKILL.md` — Level 1/2 失败时的修复路径
+- `→ ./quota-estimation.md` — preflight 通过后给用户的耗时预告（互补：preflight 防故障 / quota 防意外）
