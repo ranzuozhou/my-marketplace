@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "个人插件市场 — 提供知识管理、Git 工作流、插件开发等 Claude Code 插件",
-    "version": "1.8.0"
+    "version": "1.9.0"
   },
   "plugins": [
     {
       "name": "mj-nlm",
       "source": "./plugins/mj-nlm",
       "description": "NotebookLM 学习闭环技能家族（v2.3）— mj-system + mj-agent 双项目知识工作流；对外推荐两个 high-level wrapper：**/mj-nlm:learn-make**（生成学习资料：build + studio 上游 7 类制品）+ **/mj-nlm:learn-test**（生成考察资料：studio quiz/flashcards + 可选 query Mode D/E/F）；底层 5 skill（auth/build/manage/query/studio）保留独立可调用；v2.3 起 preflight-checklist + quota-estimation 两份 shared 规范统一启动冒烟与配额预告；v2.1 record/download/both 三模式与 --with-download/--download-only 标志透传",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "author": { "name": "ranzuozhou" },
       "category": "productivity",
       "keywords": ["notebooklm", "knowledge-base", "nlm", "google", "studio", "learning-loop", "domain-orientation", "quiz-feedback", "source-check", "mj-system", "mj-agent", "metadata-only", "online-reference", "record-mode", "learn-orchestration", "high-level-wrapper", "learn-make", "learn-test", "preflight", "quota-estimation"],

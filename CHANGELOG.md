@@ -5,6 +5,31 @@
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.4 minor bump — preflight 实施落地：把 v2.3 的 `mj-nlm-shared/preflight-checklist.md` 模板从文档级正式编入 6 个 skill（build / manage / query / studio 显式 Phase 0 + H-point；learn-make / learn-test wrapper 隐式 preflight 注解）。auth 不动。**非破坏性**；故障从 Phase 7 后移晚发现 → Phase 0 早发现。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.8.0 → 1.9.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.3.0 → 2.4.0** | **minor bump**：6 skill Phase 0 编入 preflight 实施 + shared 集成点状态更新 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.3.0 → v2.4.0
+
+- **build skill** Phase 0 由 "Auth Check" 替换为 "Preflight Check"（L1+L2 + H0a/b/c + 5min 缓存）；workflow dot graph P0/H1 标签同步
+- **manage / studio / query** 3 个 skill 各插入新 Phase 0 Preflight Check 段（L1+L2，L3 隐式由 Phase 1 首次 MCP 覆盖）
+- **learn-make / learn-test** 2 wrapper Phase 0 头部加 v2.4 隐式 Preflight 引述（委托子 skill 完整 preflight）
+- **shared/preflight-checklist.md** 集成点段加"v2.4 实施状态"列，6 skill 全部标 ✅
+- 详见 `plugins/mj-nlm/CHANGELOG.md#[2.4.0]`
+
 ## [1.8.0] - 2026-05-08
 
 ### Highlights
