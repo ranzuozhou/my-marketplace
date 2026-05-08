@@ -5,6 +5,87 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.2 minor bump — 高层入口整合：新增 `/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）两个 high-level wrapper；旧 `/mj-nlm:learn` 标 deprecated（v2.3 删除）。用户对外只需记 2 个命令，底层 6 skill 仍可独立调用。**非破坏性 UX 优化**。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.6.0 → 1.7.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.1.0 → 2.2.0** | **minor bump**：2 新 wrapper skill (learn-make / learn-test) + learn deprecated + 元数据同步 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.1.0 → v2.2.0
+
+- **新增 2 wrapper skill**：
+  - `mj-nlm-learn-make`：编排 build + studio 上游 7 类制品（mind_map/video/slide/audio/report/infographic/data_table），4 Phase + 4 H-points；启动标志 `<topic>` / `--resume` / `--triple-view` / `--with-download` / `--download-only`
+  - `mj-nlm-learn-test`：编排 studio quiz/flashcards + 可选 query Mode D/E/F，3 Phase（含 4 子分支）+ 5 H-points；启动标志 `<nb_id>` / `--full` / `--rootcause` / `--selfcheck` / `--sourcecheck`
+- **mj-nlm-learn 标 deprecated**：frontmatter `[DEPRECATED v2.2]` 前缀；body 顶加完整 Phase 对照迁移段；保留至 v2.3 删除
+- **plugin.json**：2.1.0 → 2.2.0；description 加 v2.2 高层入口；keywords +`learn-orchestration` / `high-level-wrapper` / `learn-make` / `learn-test`
+- **CLAUDE.md / README.md**：6 skill 表 → 8 skill 表（拆 high-level wrapper + 底层）；新增 v2.2 升级要点段；自然语言触发段加 wrapper 触发词
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.2.0]`。
+
+### Deprecated
+
+- mj-nlm `/mj-nlm:learn` skill — v2.3 计划删除（约 2-3 周观察期），由 wrapper 1+2 串联替代
+
+### Migration
+
+| v2.1 入口 | v2.2 替代 |
+|---|---|
+| `/mj-nlm:learn <topic>` | `/mj-nlm:learn-make <topic>` → `/mj-nlm:learn-test <nb_id>` |
+| `/mj-nlm:learn --triple-view` | `/mj-nlm:learn-make --triple-view` |
+| `/mj-nlm:learn --with-download` | `/mj-nlm:learn-make --with-download` |
+| `/mj-nlm:learn --resume <nb_id>` | `/mj-nlm:learn-make --resume <nb_id>`（共享 `learn-phase:G{N}-passed` tag） |
+| `/mj-nlm:learn --quiz-only` | `/mj-nlm:learn-test <nb_id>`（默认即等价） |
+
+底层 `/mj-nlm:auth` / `/mj-nlm:build` / `/mj-nlm:manage` / `/mj-nlm:query` / `/mj-nlm:studio` 完全不动，独立可调路径全保留。
+
+## [1.6.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.1 minor bump — Studio Phase 4 与 learn 编排默认输出形态从 download 改为 record（元信息 markdown），对齐 learning 子系统约束。download 路径保留为显式 opt-in，向后兼容。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.5.1 → 1.6.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.0.1 → 2.1.0** | **minor bump**：默认 record mode + 元信息 markdown 模板 + learn --with-download / --download-only 标志 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.0.1 → v2.1.0
+
+- **studio Phase 4 三模式**：`--mode record`（默认）/ `--mode download`（opt-in）/ `--mode both`（学习+归档）；默认输出形态从二进制改为元信息 markdown
+- **learn 默认 record + 两个新标志**：`--with-download`（默认 record 之外同时下载）/ `--download-only`（跳过 record 仅下载，v2.0 兼容）
+- **新增共享模板** `mj-nlm-shared/artifact-metadata-template.md`：frontmatter schema + ≤ 50 行 body 范式 + 与 mj-system / mj-agent learning 子系统对齐说明
+- **shared 文件计数** 7 → 8
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.1.0]`。
+
+### Breaking Changes（仅默认值层，不动 MCP 接口）
+
+- studio Phase 4 默认输出从 binary 改为 record markdown — v2.0 用户脚本若依赖 `nlm-artifacts/<file>.<ext>` 路径下的二进制，需显式加 `--mode download` 或迁到 `--mode both`
+- learn 默认走 record — v2.0 学习闭环用户的本地 mp3/mp4/pdf 不再自动产生；保留旧行为用 `--with-download`
+
+### Migration
+
+- 沿用 v2.0 行为：`/mj-nlm:studio --mode download` 或 `/mj-nlm:learn --download-only` / `--with-download`
+- 采纳 v2.1 默认：直接执行；按 H6 提示填 record 输出路径（mj-system / mj-agent 项目建议 `learning/<topic>/_nlm/`）
+- MCP 接口与现有 v2.0 已下载的文件路径不变
+
 ## [1.5.1] - 2026-05-06
 
 ### Highlights

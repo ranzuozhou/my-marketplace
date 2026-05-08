@@ -7,6 +7,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05-08
+
+### 升级主旨
+
+把 v2.0 引入的单一编排器 `/mj-nlm:learn` 拆为两个语义对偶的 high-level wrapper：`/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）。用户对外只需记 2 个命令，底层 6 skill 仍可独立调用。**非破坏性 UX 优化**。
+
+### Added
+
+- **新增 skill `mj-nlm-learn-make`**（wrapper 1，学习侧编排器）：
+  - 4 Phase：Notebook Locate → Build (条件) → Artifact Mix Selection (AskUserQuestion 多选 7 类) → Studio Iteration (循环 record mode)
+  - 启动标志：`<topic>` / `--resume <nb_id>` / `--triple-view` / `--with-download` / `--download-only`
+  - 复用底层 `build` (Phase 1) + `studio` (Phase 3)，纯 dispatch 不重写
+  - H1-H4 涵盖 build 失败 / 多选为空 / 单类失败 / 来源不足
+- **新增 skill `mj-nlm-learn-test`**（wrapper 2，考察侧编排器）：
+  - 3 Phase（含 4 子分支 2a/2b/2c/2d）：Notebook Locate → Assessment Mix Selection (默认锁 quiz+flashcards，D/F/E 需勾) → Quiz/Flashcards 生成 → 错题归因/自检/来源核查
+  - 启动标志：`<nb_id>` / `--full` / `--rootcause` / `--selfcheck` / `--sourcecheck`
+  - 复用底层 `studio` (Phase 2a) + `query` Mode D/F/E (Phase 2b/2c/2d)
+  - H0/H1/H2a/H2b/H2d 涵盖无 notebook / 取消默认锁 / studio 失败 / 错题空 / 高风险强制核查
+- **新增自然语言触发词**：「生成学习资料 / 一键学习材料」 → learn-make；「生成考察资料 / 出题 / 错题归因 / 自检 / 来源核查」 → learn-test
+
+### Changed
+
+- **mj-nlm-learn SKILL.md frontmatter** description 前缀加 `[DEPRECATED v2.2 — use /mj-nlm:learn-make + /mj-nlm:learn-test 串联替代]`
+- **mj-nlm-learn SKILL.md body** 顶加 v2.2 迁移段（含 v2.1 → v2.2 的 Phase 对照表）；保留全部 10 Phase 原文供 v2.3 删除前回滚
+- **CLAUDE.md**：v2.2 升级要点段；6 skill 表 → 8 skill 表（拆分为 high-level wrapper + 底层 skill 两段）；文件结构 + skill 调用约定
+- **README.md**：v2.2 顶引；6 命令 → 8 命令表（同样拆两段）；新增「v2.2 核心新概念」段（高层入口 / 完整闭环示例 / 与 v2.1 关系）；快速上手段重写为「两 wrapper 串联」；自然语言触发段加 learn-make / learn-test 触发词；roadmap 标 v2.2 完成、v2.3-v2.5 重排
+- **plugin.json**：version 2.1.0 → 2.2.0；description 加 v2.2 高层入口说明；keywords 新增 `learn-orchestration` / `high-level-wrapper` / `learn-make` / `learn-test`
+
+### Deprecated
+
+- **`/mj-nlm:learn`** — v2.0 引入的单一编排器；v2.2 起标 deprecated，由 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联替代；保留至 v2.3 删除（约 2-3 周观察期），现有 v2.0/v2.1 用户不受影响
+
+### Migration（v2.1 → v2.2）
+
+| v2.1 `/mj-nlm:learn` 阶段 | v2.2 替代 |
+|---|---|
+| Phase 0-1（来源准备 + build） | `/mj-nlm:learn-make <topic>` 内置 Phase 1 (build 条件触发) |
+| Gate 1（00c 审定） | 下沉到 build skill Phase 7 H-point；如需强审定可单独 `/mj-nlm:build` |
+| Phase 2-5（mind_map / video / slide / audio） | `/mj-nlm:learn-make` Phase 2 多选 + Phase 3 循环 |
+| Phase 6（quiz + flashcards） | `/mj-nlm:learn-test <nb_id>` Phase 2a（默认锁定） |
+| Phase 7（Mode D 错题归因） | `/mj-nlm:learn-test --rootcause <nb_id>` 或 Phase 1 勾选 |
+| Phase 8（Mode F 自检） | `/mj-nlm:learn-test --selfcheck <nb_id>` 或 Phase 1 勾选 |
+| Phase 9（Mode E 来源核查） | `/mj-nlm:learn-test --sourcecheck <nb_id>` 或 Phase 1 勾选 |
+| `--triple-view` | `/mj-nlm:learn-make --triple-view <topic>` |
+| `--with-download` / `--download-only` | 同名标志，wrapper 1/2 均支持透传 |
+| `--resume <nb_id>` | `/mj-nlm:learn-make --resume <nb_id>`（兼容旧 `learn-phase:G{N}-passed` tag） |
+| `--lite` / `--quiz-only` | wrapper 1 不选 video / wrapper 2 默认即等价 |
+
+完整 v2.2 替代流程：`/mj-nlm:learn-make <topic>` → notebook + 学习资料 → `/mj-nlm:learn-test <nb_id>` → 考察资料 + 自检
+
+### Known Issues / Roadmap
+
+- v2.3 计划删除 deprecated 的 `/mj-nlm:learn`（约 2-3 周观察期后）
+- v2.2 wrapper description 与底层 studio/build/query description 关键词存在重叠 → agent 分发时按 wrapper 强标识词「编排 / orchestrate / 一键 / wrapper」+ 反向「Do not use for: 单步...」三段消歧；如发现 agent 分发摇摆，会在 v2.2.x patch 强化 description
+- 旧 v2.0/v2.1 `/mj-nlm:learn --resume <nb_id>` 流程可由 `/mj-nlm:learn-make --resume` 无缝接管（共享 `learn-phase:G{N}-passed` tag）
+
+## [2.1.0] - 2026-05-08
+
+### 升级主旨
+
+studio Phase 4 默认输出形态从「download 二进制到本地」改为「record 元信息 markdown」，对齐 mj-system / mj-agent learning 子系统的强约束（markdown 进 git，binary 永不入 git，NotebookLM 产物全部在线托管）。download 路径降级为显式 opt-in。
+
+### Added
+
+- **新增共享模板 `mj-nlm-shared/artifact-metadata-template.md`**：record markdown 范式（frontmatter schema + ≤ 50 行 body + 命名与存放约定 + 与 learning 子系统对齐说明 + record vs download 对比）
+- **studio skill Phase 4 三模式**：`--mode record`（默认）/ `--mode download`（opt-in）/ `--mode both`（学习+归档）
+- **studio skill 新增 H5 / H6**：H5（mode 不明确时根据语境关键词询问）/ H6（record 模式但未指定输出路径时提议默认路径）
+- **learn skill 新增标志**：`--with-download`（默认 record 之外同时下载，等同子调度 `mode=both`）/ `--download-only`（跳过 record 仅下载，等同 `mode=download`，v2.0 兼容）
+- **studio / learn description 关键词扩展**：`metadata only` / `record_artifact_metadata` / `online reference` / `no download` / `online only` / `全在线模式` / `不下载`
+
+### Changed
+
+- **studio skill SKILL.md Phase 4 重写**：原"Download & Rename"改为"Output Capture"，含 Step 4.0 重命名（通用） + Step 4a/4b/4c 三模式分支；workflow dot 图新增 P4_R / P4_D / P4_B 三节点
+- **studio skill Quick Start 表新增三行 v2.1 触发**：「只要 metadata」/「既要 metadata 也要本地」/「必须本地有二进制」
+- **studio skill Examples 新增**：示例 1b（三版 both）/ 示例 6（v2.1 record 单制品）/ 示例 7（v2.1 download 显式离线）
+- **learn skill Phase 2-6 调度参数加 mode 字段**：默认 record，从 learn 启动参数透传
+- **learn skill Gate 2/3/4 文案**：审定对象由「本地文件」改为「NotebookLM 在线制品」（artifact 完成 ≠ 必须本地化）
+- **learn skill Phase 6 quiz/flashcards 输出说明**：默认 record markdown 含 NotebookLM URL 用于在线答题；`--with-download` 时本地存 JSON 便于做题工具加载
+- **learn skill Handoff 输出**：按 mode 分形态展示 record / both / download 输出物
+- **learn skill 示例**：示例 1 改为 v2.1 默认 record；新增示例 1b（--with-download）
+- **`mj-nlm-shared/artifact-type-reference.md`**：顶部加 v2.1 默认行为变更说明；新增「v2.1 输出模式（record / download / both）」段（含 record mode 与 9 类 artifact_type 关系矩阵）
+- **CLAUDE.md**：v2.1 升级要点段；6 skill 表标 v2.1 升级；shared 文件计数 7 → 8；skill 调用约定新增 record mode 默认条目
+- **README.md**：v2.1 顶引；6 命令表更新；新增「v2.1 核心新概念」段（默认 record / 三模式 / 与 learning 子系统对齐）；自然语言触发段加 metadata only / both 触发词；roadmap 标 v2.1 完成
+- **plugin.json**：version 2.0.1 → 2.1.0；description 加 v2.1 默认行为说明；keywords 新增 `metadata-only` / `online-reference` / `record-mode`
+
+### Breaking Changes（仅 workflow 与默认值层，不动 MCP 接口）
+
+- **studio Phase 4 默认输出从 binary 改为 record markdown**——v2.0 用户脚本若依赖 `nlm-artifacts/<file>.<ext>` 路径下的二进制，需显式加 `--mode download` 或迁到 `--mode both`
+- **learn 默认走 record**——v2.0 学习闭环用户的本地 mp3/mp4/pdf 不再自动产生；如需保留旧行为加 `--with-download` 或 `--download-only`
+- 不影响：MCP 接口（download_artifact / studio_create / studio_status 调用方式与签名均不变）；现有 v2.0 录制的文件路径；focus prompt 模板与 view 子参数
+
+### Migration（v2.0 → v2.1）
+
+- **保留 v2.0 行为**：单步 `/mj-nlm:studio` 调用加 `--mode download`；编排器 `/mj-nlm:learn` 加 `--download-only` 或 `--with-download`（推荐后者，留下 record 沉淀）
+- **采纳 v2.1 默认**：直接执行不带 mode 的命令；首次执行时按 H6 提示提供 record 输出路径（建议 mj-system / mj-agent 项目用 `learning/<topic>/_nlm/`）
+- **历史 artifact 补录 record markdown**：v2.1 不提供独立 skill；如频繁补录，按 `artifact-metadata-template.md` 手动填一份；v2.x 路线图考虑加 mj-nlm-record skill
+- **NLM artifact-level URL 调研**：v2.1 采用回退方案 B（`artifact_url` 与 `notebook_url` 同值，body 内含「在 notebook 内定位本制品」段）；v2.2 路线图含 NLM API 能力调研，若上游暴露 artifact 直链则 record 模板自动升级
+
+### Known Issues / Roadmap
+
+- v2.1 NotebookLM artifact-level URL 暂回退方案 B（仅 notebook_url），若官方后续暴露则 v2.2 自动升级 record 模板
+- v2.1 不提供 mj-nlm-record 独立 skill；历史 artifact 补录需按模板手动填；v2.x 视使用频率决定是否加
+- v2.1 record markdown 路径默认提示 `learning/<topic>/_nlm/`，依赖用户 vault 已有该层级；mj-system / mj-agent learning 子系统 Phase 0 落地后此默认路径自动可用
+
 ## [2.0.1] - 2026-05-06
 
 ### Changed
