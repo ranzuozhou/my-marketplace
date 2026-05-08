@@ -112,6 +112,19 @@ digraph nlm_studio {
 
 ---
 
+### Phase 0: Preflight Check (v2.4)
+
+按 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) 执行 L1 + L2（L3 在 Phase 1 锁定 notebook_id 后由 `notebook_describe()` 隐式覆盖）：
+
+1. **L1 Auth Token** — `server_info()` → 失败走 **H0a** 引导 `/mj-nlm:auth`
+2. **L2 NLM Service Health** — `notebook_list()` → `PERMISSION_DENIED` 走 **H0b** `/mj-nlm:auth`；其他错误走 **H0c** soft warn
+
+**缓存**：5 min 内同会话同 skill 已通过 L1+L2 → 跳过本 Phase（`--force-recheck` 重跑）。
+
+通过条件：L1 + L2 全 OK → 进 Phase 1 Notebook Locate。
+
+---
+
 ### Phase 1: Notebook Locate
 
 **定位目标 notebook。** 制品生成必须基于已有 notebook，需先确定目标。

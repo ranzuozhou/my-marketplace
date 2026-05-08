@@ -1,5 +1,7 @@
 # mj-nlm — NotebookLM Learning-Loop Plugin for Claude Code
 
+> **v2.4 — Preflight 实施落地**：v2.3 的 `preflight-checklist.md` 模板正式编入 6 个 skill 的 Phase 0 实施段（build / manage / query / studio 显式 Phase 0 + H0a/b/c；learn-make / learn-test wrapper 加隐式 preflight 注解委托子 skill）。auth skill 不动。仅文档结构改动，**非破坏性**；故障从 Phase 7 后移晚发现 → Phase 0 早发现。
+>
 > **v2.3 — Deprecation removal + 启动规范**：移除 v2.2 forward-announce 的 `/mj-nlm:learn` skill；新增 2 份共享规范 `preflight-checklist.md`（启动冒烟三级 L1 Auth / L2 MCP health / L3 Notebook scope）+ `quota-estimation.md`（单调用基线 + 双 wrapper 配额预告）。skill 数 8 → 7；shared 文档 8 → 10。**轻量 BREAKING（v2.2 已公告期 ~2 周）**。
 >
 > **v2.2 — 高层入口整合**：新增 `/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）两个 high-level wrapper。用户对外只需记 2 个命令，底层 skill 仍可独立调用。

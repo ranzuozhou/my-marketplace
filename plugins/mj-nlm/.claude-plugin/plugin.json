@@ -1,7 +1,7 @@
 {
   "name": "mj-nlm",
   "description": "MJ-AgentLab NotebookLM 学习闭环技能家族 - 覆盖 mj-system + mj-agent 双项目；对外推荐两个 high-level wrapper：/mj-nlm:learn-make（生成学习资料）+ /mj-nlm:learn-test（生成考察资料），底层 5 skill（auth/build/manage/query/studio）保留独立可调用；v2.3 起 preflight-checklist + quota-estimation 两份 shared 规范启动冒烟与配额预告",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "author": {
     "name": "ranzuozhou"
   },

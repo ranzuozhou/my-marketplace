@@ -76,6 +76,19 @@ digraph nlm_manage {
 
 ---
 
+## Phase 0: Preflight Check (v2.4)
+
+按 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) 执行 L1 + L2（L3 在具体 CRUD 操作首次 `notebook_describe` 调用隐式覆盖）：
+
+1. **L1 Auth Token** — `server_info()` → 失败走 **H0a** `/mj-nlm:auth`
+2. **L2 NLM Service Health** — `notebook_list()` → `PERMISSION_DENIED` 走 **H0b** `/mj-nlm:auth`；其他错误走 **H0c** soft warn
+
+**缓存**：5 min 内同会话已通过 L1+L2 → 跳过本 Phase。
+
+通过条件：L1 + L2 全 OK → 进入下方任意 CRUD 操作章节。
+
+---
+
 ## Notebook 操作
 
 ### 列出

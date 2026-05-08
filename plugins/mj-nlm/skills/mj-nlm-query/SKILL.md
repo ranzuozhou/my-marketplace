@@ -112,6 +112,19 @@ digraph nlm_query {
 
 ---
 
+### Phase 0: Preflight Check (v2.4)
+
+按 [`../mj-nlm-shared/preflight-checklist.md`](../mj-nlm-shared/preflight-checklist.md) 执行 L1 + L2（L3 在 Phase 1 选定 notebook 后由 `notebook_query` 自身首次调用隐式覆盖）：
+
+1. **L1 Auth Token** — `server_info()` → 失败走 **H0a** `/mj-nlm:auth`
+2. **L2 NLM Service Health** — `notebook_list()` → `PERMISSION_DENIED` 走 **H0b** `/mj-nlm:auth`；其他错误走 **H0c** soft warn
+
+**缓存**：5 min 内同会话同 skill 已通过 L1+L2 → 跳过本 Phase。
+
+通过条件：L1 + L2 全 OK → 进 Phase 1 Notebook & Mode Selection。
+
+---
+
 ### Phase 1: Notebook & Mode Selection
 
 **确定查询目标和模式。** 不同模式适用于不同场景。
