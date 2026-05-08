@@ -10,7 +10,8 @@ description: >
   import sources to nlm, knowledge base creation, domain orientation report,
   learning map, source adequacy check.
   Do not use for: 仅生成制品 (use mj-nlm:studio), 知识问答/错题分析/来源核查 (use mj-nlm:query),
-  完整学习闭环编排（10 Phase + 5 Gate） (use mj-nlm:learn),
+  生成学习资料的完整编排（build + studio 上游 7 类制品） (use mj-nlm:learn-make),
+  生成考察资料的完整编排（quiz/flashcards + 错题/自检/核查） (use mj-nlm:learn-test),
   notebook 删除/重命名/分享 (use mj-nlm:manage), 仅认证修复 (use mj-nlm:auth).
 ---
 
@@ -25,7 +26,7 @@ v2 升级要点（相比 v1）：
 - **Phase 7 新增「领域定向报告」**：基于来源生成学习地图（含术语翻译、概念图、成功失败案例、学习路线），输出 `00c-定向-{topic}领域定向报告`，作为后续 studio 制品的锚
 - **双项目支持**：`project=agent`（MJ-AgentLab）与 `project=system` 并列，各自独立 scope→扫描路径映射
 
-**互补 skill**：制品生成使用 `/mj-nlm:studio`；知识问答 / 错题反馈 / 来源核查 / 理解度自检使用 `/mj-nlm:query`；学习闭环编排使用 `/mj-nlm:learn`；生命周期管理使用 `/mj-nlm:manage`。
+**互补 skill**：制品生成使用 `/mj-nlm:studio`；知识问答 / 错题反馈 / 来源核查 / 理解度自检使用 `/mj-nlm:query`；生成学习资料完整编排使用 `/mj-nlm:learn-make`；生成考察资料完整编排使用 `/mj-nlm:learn-test`；生命周期管理使用 `/mj-nlm:manage`。
 
 ## Prerequisites
 
@@ -80,7 +81,7 @@ digraph nlm_build {
     P7 [label="Phase 7: Domain Orientation Report (v2)\n领域定向报告 prompt → Note + Source\n→ 00c 定向报告"];
     H8 [label="H8: Conditional\n报告生成失败", shape=diamond, style=filled, fillcolor="#ffffcc"];
 
-    DONE [label="Handoff\n→ /mj-nlm:learn / studio / query", shape=doublecircle];
+    DONE [label="Handoff\n→ /mj-nlm:learn-make / studio / query", shape=doublecircle];
 
     start -> P0;
     P0 -> H1 [label="失败"];
@@ -370,7 +371,8 @@ Notebook:
 高风险标记: {none / high}
 
 下一步:
-  - 完整学习闭环 → /mj-nlm:learn （v2 推荐入口）
+  - 生成学习资料完整编排 → /mj-nlm:learn-make （v2.3 推荐入口）
+  - 生成考察资料完整编排 → /mj-nlm:learn-test
   - 单步生成制品 → /mj-nlm:studio
   - 知识问答 / 错题反馈 / 来源核查 → /mj-nlm:query
   - 管理维护 → /mj-nlm:manage
@@ -388,7 +390,7 @@ Notebook:
 → Phase 1-5：扫描 src/CollectionNodes/DataQualityValidator/ + docs/design/DataQualityValidator/，导入 ~15 个文件
 → Phase 6：source 总字数 ~25K → ALLOW，无高风险标记
 → Phase 7：调 notebook_query 生成领域定向报告 → 保存 00c
-→ Handoff: 推荐进入 /mj-nlm:learn
+→ Handoff: 推荐进入 /mj-nlm:learn-make
 ```
 
 ### 示例 2：mj-agent 单 tool 知识库（v2 新场景）
@@ -450,6 +452,8 @@ Notebook:
 
 ## Reference Files
 
+- **`→ ../mj-nlm-shared/preflight-checklist.md`** — Phase 0 三级 preflight（auth + MCP health + notebook scope，v2.3 起）
+- **`→ ../mj-nlm-shared/quota-estimation.md`** — Phase 0 通过 preflight 后的耗时与配额预告（v2.3 起）
 - **`→ ../mj-nlm-shared/naming-reference.md`** — Notebook/Source/Tag 命名规范 + 双项目 scope→扫描映射详表（Phase 1, 3, 5 参考）
 - **`→ ../mj-nlm-shared/material-classification.md`** — 三分法 + 多源类型分类 + 敏感过滤正则 + 文件大小限制（Phase 2-3 参考）
 - **`→ ../mj-nlm-shared/risk-control-templates.md`** — 来源/制品配比矩阵 + 风险类别白名单 + 充足性报告模板（Phase 6 参考）

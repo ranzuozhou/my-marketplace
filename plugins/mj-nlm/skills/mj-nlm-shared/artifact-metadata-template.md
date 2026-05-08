@@ -204,9 +204,10 @@ mj-system learning 子系统约束：
 | 触发场景 | 调用 skill | 写入位置 | 备注 |
 |---|---|---|---|
 | 新生成 artifact（默认 record mode） | `/mj-nlm:studio --mode record`（或默认） | 用户提供路径，建议 `learning/<topic>/_nlm/` | studio Phase 4 record 分支自动渲染 |
-| 学习闭环（默认） | `/mj-nlm:learn`（Phase 8 默认走 record） | 同上 | learn 编排 studio --mode record |
-| 既要 metadata 又要 download | `/mj-nlm:studio --mode both` | record 写 `_nlm/`，binary 用户自存（不入 git） | 学习+归档场景 |
-| 历史 artifact 补录（无 record） | 手动按本模板填写 | 同上 | v2.1 不提供独立 skill；如频繁，未来可加 mj-nlm-record skill |
+| 生成学习资料（默认） | `/mj-nlm:learn-make`（Phase 3 循环默认走 record） | 同上 | wrapper 编排 studio --mode record |
+| 生成考察资料（默认） | `/mj-nlm:learn-test`（Phase 2a quiz/flashcards 默认走 record） | 同上 | wrapper 编排 studio --mode record |
+| 既要 metadata 又要 download | `/mj-nlm:studio --mode both` 或 wrapper `--with-download` | record 写 `_nlm/`，binary 用户自存（不入 git） | 学习+归档场景 |
+| 历史 artifact 补录（无 record） | 手动按本模板填写 | 同上 | v2.1/v2.3 均不提供独立 skill；如频繁可考虑独立 mj-nlm-record skill |
 
 ---
 

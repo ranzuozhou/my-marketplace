@@ -175,23 +175,8 @@ build skill Phase 6 预检结果作为 `00d-预检-来源充足性报告` Source
 
 ## 6. 配额与成本提示
 
-每次 `/mj-nlm:learn` 完整闭环约触发：
+→ 详见独立文档：[`./quota-estimation.md`](./quota-estimation.md)（v2.3 起）
 
-| 调用类型 | 次数 | 预估耗时 |
-|---|---|---|
-| `notebook_query` (领域定向报告) | 1 | ~30 秒 |
-| `studio_create`（mind_map） | 1 | ~30 秒 |
-| `studio_create`（video） | 1 | ~3 分钟 |
-| `studio_create`（slide_deck） | 1 | ~2 分钟 |
-| `studio_create`（audio） | 1 | ~3 分钟 |
-| `studio_create`（quiz） | 1 | ~30 秒 |
-| `studio_create`（flashcards） | 1 | ~30 秒 |
-| `notebook_query` (错题 root cause) | 视错题数 | ~30 秒 / 题 |
-| `notebook_query` (来源核查) | 1 | ~30 秒 |
-| `notebook_query` (理解度自检) | 1 | ~30 秒 |
+该文档覆盖：单调用耗时基线 / 双 wrapper（learn-make + learn-test）配额预告 / build / studio / query 单步耗时 / NotebookLM 公开+经验配额。
 
-**总计**：单次完整闭环 7-9 个 `studio_create` + 3-5 个 `notebook_query`，约 12-15 分钟。
-
-如果加 `--triple-view` 三版生成，再增加 2 倍 studio_create 调用（额外 12-18 分钟）。
-
-learn skill 在 Phase 0 必须告知用户预计耗时与配额消耗。
+各 skill 在 Phase 0 preflight 通过后，必须按 quota-estimation.md 给出的总耗时报告模板告知用户预计耗时。

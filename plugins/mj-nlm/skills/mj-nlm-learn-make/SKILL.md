@@ -25,7 +25,7 @@ description: >
 
 **v2.2 升级要点**：
 - 与 wrapper 2 `/mj-nlm:learn-test`（生成考察资料）对偶
-- 替代 v2.0/v2.1 的 `/mj-nlm:learn` 上游编排（learn 已 deprecated）
+- 替代 v2.0/v2.1 的 `/mj-nlm:learn` 上游编排（v2.3 已删除）
 - 默认 record mode（v2.1 记忆透传），二进制不入 git
 - 内部 100% 复用 build / studio 现有 Phase，不重写底层逻辑
 
@@ -316,10 +316,11 @@ Tag 自动添加: `learn-make-loop`
 
 ## Reference Files
 
+- **`→ ../mj-nlm-shared/preflight-checklist.md`** — Phase 0 三级 preflight（auth + MCP health + notebook scope，v2.3 起）
+- **`→ ../mj-nlm-shared/quota-estimation.md`** — wrapper 配额预告（v2.3 起；含 learn-make 默认 7 类制品 + `--triple-view` 加成）
 - **`→ ../mj-nlm-shared/artifact-type-reference.md`** — 7 类学习制品的子参数详情 + v2.1 三输出模式
 - **`→ ../mj-nlm-shared/artifact-metadata-template.md`** — record markdown frontmatter schema（Phase 3 输出范式）
 - **`→ ../mj-nlm-shared/focus-prompt-templates.md`** — Intent Layer 模板（studio 子调度依赖）
-- **`→ ../mj-nlm-shared/risk-control-templates.md#6`** — 配额与成本估算
 - **`→ ../mj-nlm-build/SKILL.md`** — Phase 1 完整调度的子 skill
 - **`→ ../mj-nlm-studio/SKILL.md`** — Phase 3 循环调度的子 skill
 - **`→ ../mj-nlm-learn-test/SKILL.md`** — 配对的 wrapper 2（考察侧入口）

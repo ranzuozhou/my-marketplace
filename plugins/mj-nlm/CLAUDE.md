@@ -4,12 +4,18 @@
 
 mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）的 NotebookLM 学习闭环技能家族 Plugin。
 
+**v2.3 升级要点**（deprecation removal + 启动规范，**轻量 BREAKING 已经过 v2.2 公告期**）：
+- 删除 `/mj-nlm:learn` skill（v2.0 引入，v2.2 deprecated）；改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联
+- 新增 2 份共享规范：
+  - `mj-nlm-shared/preflight-checklist.md` — 三级启动冒烟（L1 Auth / L2 MCP health / L3 Notebook scope）
+  - `mj-nlm-shared/quota-estimation.md` — 单调用基线 + 双 wrapper 配额预告（v2.0/v2.1 卡 Phase 7 的根因前移到 Phase 0）
+- 共享文档总数 8 → 10；skill 总数 8 → 7
+
 **v2.2 升级要点**（高层入口整合，**非破坏性**）：
 - 新增 2 个 high-level wrapper skill：
   - `/mj-nlm:learn-make` — 生成学习资料（编排 build + studio 上游 7 类制品）
   - `/mj-nlm:learn-test` — 生成考察资料（编排 studio quiz/flashcards + 可选 query Mode D/E/F）
-- 旧 `/mj-nlm:learn` 标 deprecated（v2.3 删除），由两 wrapper 串联替代
-- 用户对外只需记 2 个 high-level 命令，底层 6 skill 仍可独立调用
+- 用户对外只需记 2 个 high-level 命令，底层 skill 仍可独立调用
 - 命令形态：`/mj-nlm:learn-make <topic>` → `/mj-nlm:learn-test <notebook_id>`
 
 **v2.1 升级要点**（默认行为变更，**非破坏性**）：
@@ -20,14 +26,14 @@ mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）
 
 **v2.0 升级要点**：从「被动产出制品」重构为「学习闭环」（依据方法论文档），新增 1 个 orchestrator skill、3 份共享 prompt 模板与一套理解度量化指标。
 
-## 8 个 Skill（v2.2: 6 → 8 = 6 底层 + 2 high-level wrapper）
+## 7 个 Skill（v2.3: 8 - 1 = 5 底层 + 2 high-level wrapper）
 
 ### High-level wrapper（v2.2 新增，对外推荐入口）
 
 | Skill | 命令 | 职责 | v 版本 |
 |---|---|---|---|
-| **learn-make** | `/mj-nlm:learn-make` | **生成学习资料**：编排 build + studio 上游 7 类制品（mind_map/video/slide/audio/report/infographic/data_table） | **v2.2 新增** |
-| **learn-test** | `/mj-nlm:learn-test` | **生成考察资料**：编排 studio quiz/flashcards + 可选 query Mode D（错题归因）/F（自检）/E（来源核查） | **v2.2 新增** |
+| **learn-make** | `/mj-nlm:learn-make` | **生成学习资料**：编排 build + studio 上游 7 类制品（mind_map/video/slide/audio/report/infographic/data_table） | v2.2 |
+| **learn-test** | `/mj-nlm:learn-test` | **生成考察资料**：编排 studio quiz/flashcards + 可选 query Mode D（错题归因）/F（自检）/E（来源核查） | v2.2 |
 
 ### 底层 skill（独立可调用，wrapper 内部调度）
 
@@ -38,7 +44,6 @@ mj-nlm 是 MJ-AgentLab 组织（覆盖 mj-system 与 mj-agent 两个子项目）
 | **manage** | `/mj-nlm:manage` | 知识库 CRUD + 分享 | v1（不动） |
 | **query** | `/mj-nlm:query` | 知识问答（Single / Cross / Deep Research / Quiz Root Cause / Source Check / Self-Check） | v2 升级（新增 Mode D/E/F） |
 | **studio** | `/mj-nlm:studio` | Studio 制品生成（9 种类型 × 4 view 视角 + 默认幻觉防护 + v2.1 record/download/both 三模式） | v2.1（默认 record mode） |
-| **learn** | `/mj-nlm:learn` | ⚠ **v2.2 DEPRECATED** — 用 learn-make + learn-test 串联替代，本 skill 保留至 v2.3 删除 | v2.1（弃用中） |
 
 ## 双项目支持（v2 新增）
 
@@ -63,12 +68,14 @@ nlm login
 
 ## Skill 调用约定
 
-- 所有 skill 遵循 Phase 式工作流（Phase 0 认证检查 → 业务 Phase）
+- 所有 skill 遵循 Phase 式工作流（Phase 0 preflight → 业务 Phase）
+- **v2.3 起 Phase 0 标准化为三级 preflight**（详见 `mj-nlm-shared/preflight-checklist.md`）：L1 Auth Token / L2 NLM Service Health / L3 Notebook scope（条件触发）
 - 认证失败统一引导到 `/mj-nlm:auth`
 - 破坏性操作（delete）需用户二次确认（`confirm=True`）
 - v2 起所有 studio_create 默认追加幻觉防护约束句（可 `disable_guardrails=True` 关闭，但 `risk-class:high` tag 强制开）
 - **v2.1 起 studio Phase 4 默认输出 record markdown**（`--mode record`），而非 download 二进制；download 与 both 为显式 opt-in
-- **v2.2 起对外推荐入口为 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 两个 wrapper**；底层 6 skill 仍可独立调用（advanced 路径）
+- **v2.2 起对外推荐入口为 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 两个 wrapper**；底层 5 skill 仍可独立调用（advanced 路径）
+- **v2.3 起 preflight 通过后必须按 `mj-nlm-shared/quota-estimation.md` 模板告知用户预计耗时与配额消耗**
 - 共享参考资源位于 `skills/mj-nlm-shared/` 目录
 
 ## 文件结构
@@ -82,14 +89,15 @@ skills/
 ├── mj-nlm-studio/      # Studio 制品（v2，含 view + guardrails；v2.1 三输出模式）
 ├── mj-nlm-learn-make/  # 学习侧编排器 wrapper 1（v2.2 新增）
 ├── mj-nlm-learn-test/  # 考察侧编排器 wrapper 2（v2.2 新增）
-├── mj-nlm-learn/       # ⚠ v2.2 DEPRECATED — 旧编排器，v2.3 删除
-└── mj-nlm-shared/      # 共享参考资源（8 份）
+└── mj-nlm-shared/      # 共享参考资源（10 份）
+    ├── preflight-checklist.md       # NLM 启动冒烟三级 checklist（v2.3 新增）
+    ├── quota-estimation.md          # 配额与耗时预告（v2.3 新增，从 risk-control §6 抽出）
     ├── naming-reference.md          # 双项目 scope→路径映射 + 元 source 编号
     ├── material-classification.md   # 三分法 + 多源类型分类
     ├── artifact-type-reference.md   # 9 种 artifact_type + v2 横切子参数 + v2.1 三输出模式
     ├── artifact-metadata-template.md  # NLM 制品元信息记录范式（v2.1 新增）
     ├── focus-prompt-templates.md    # 学习导向 Intent Layer 模板（v2 重写）
-    ├── risk-control-templates.md    # 来源/制品配比 + 幻觉防护约束（v2 新增）
+    ├── risk-control-templates.md    # 来源/制品配比 + 幻觉防护约束（v2 新增；v2.3 起 §6 配额抽出到 quota-estimation.md）
     ├── learning-loop-templates.md   # 7 个 prompt 模板（领域定向/三版/错题/案例/核查/术语/自检，v2 新增）
     └── understanding-metrics.md     # 7 项理解度量化指标（v2 新增）
 ```

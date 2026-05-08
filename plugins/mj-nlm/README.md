@@ -1,6 +1,8 @@
 # mj-nlm — NotebookLM Learning-Loop Plugin for Claude Code
 
-> **v2.2 — 高层入口整合**：新增 `/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）两个 high-level wrapper；旧 `/mj-nlm:learn` 标 deprecated。用户对外只需记 2 个命令，底层 6 skill 仍可独立调用。
+> **v2.3 — Deprecation removal + 启动规范**：移除 v2.2 forward-announce 的 `/mj-nlm:learn` skill；新增 2 份共享规范 `preflight-checklist.md`（启动冒烟三级 L1 Auth / L2 MCP health / L3 Notebook scope）+ `quota-estimation.md`（单调用基线 + 双 wrapper 配额预告）。skill 数 8 → 7；shared 文档 8 → 10。**轻量 BREAKING（v2.2 已公告期 ~2 周）**。
+>
+> **v2.2 — 高层入口整合**：新增 `/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）两个 high-level wrapper。用户对外只需记 2 个命令，底层 skill 仍可独立调用。
 >
 > **v2.1 — 全在线 + Metadata-Only 默认行为**：studio Phase 4 默认输出元信息 markdown（record mode），二进制 download 降级为显式 opt-in；对齐 learning 子系统「markdown 进 git，binary 永不入 git」约束。
 >
@@ -8,7 +10,7 @@
 
 MJ-AgentLab NotebookLM 技能家族，把 NotebookLM 多媒体当作「理解脚手架」，先降低进入陌生主题的成本，再用领域定向报告 / 三版生成 / Quiz 错题反馈 / 来源核查 / 理解度自检完成完整学习闭环。
 
-## 8 个命令（v2.2: 6 → 8 = 6 底层 + 2 high-level wrapper）
+## 7 个命令（v2.3: 8 - 1 = 5 底层 + 2 high-level wrapper）
 
 ### High-level wrapper（v2.2 新增，对外推荐入口）
 
@@ -26,7 +28,6 @@ MJ-AgentLab NotebookLM 技能家族，把 NotebookLM 多媒体当作「理解脚
 | `/mj-nlm:manage` | 管理知识库（Notebook / Source / Tag CRUD + 分享） |
 | `/mj-nlm:query` | 知识问答（6 种 Mode：Single / Cross / Deep Research / Quiz Root Cause / Source Check / Self-Check） |
 | `/mj-nlm:studio` | Studio 制品生成（9 种类型 × 4 view 视角 + 默认幻觉防护 + v2.1 record/download/both 三输出模式，默认 record） |
-| `/mj-nlm:learn` | ⚠ **v2.2 DEPRECATED** — 请用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联；本 skill 保留至 v2.3 删除 |
 
 ## v2.2 核心新概念
 
@@ -117,9 +118,20 @@ v2.1 默认行为正好对齐该约束，learn skill 编排默认走 record 路�
 
 新增 Mode D（Quiz 错题 root cause）、Mode E（Source Check 来源核查）、Mode F（7 项理解度自检 → 仪表盘 Note）。
 
-### 学习闭环编排器 `/mj-nlm:learn`（v2.2 deprecated）
+## v2.3 核心新概念
 
-v2.0 引入；v2.2 拆为 `/mj-nlm:learn-make` + `/mj-nlm:learn-test`；本 skill 保留至 v2.3 删除。
+### 启动冒烟与配额预告
+
+v2.3 把 v2.0/v2.1 学习闭环卡 Phase 7 的根因（认证 / scope 故障晚发现）前移到 Phase 0：
+
+- **`mj-nlm-shared/preflight-checklist.md`** — 三级 preflight：L1 Auth Token / L2 NLM Service Health（server_info + notebook_list） / L3 Notebook scope（条件触发）；含 5min 缓存策略 + H-point 模板
+- **`mj-nlm-shared/quota-estimation.md`** — 单调用耗时基线（per-source / per-artifact） + 双 wrapper 配额预告 + build/studio/query 单步耗时 + NotebookLM 公开+经验配额上限
+
+各 skill 在 Phase 0 通过 preflight 后，按 quota-estimation 的总耗时报告模板告知用户预计耗时与调用次数，让用户决定是否启动、是否后台等。
+
+### Deprecation removal
+
+`/mj-nlm:learn`（v2.0 引入 / v2.2 deprecated）已在 v2.3 移除。所有调用应改用 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联。Migration 见 `CHANGELOG.md#[2.3.0]`。
 
 ## 双项目支持
 
@@ -198,7 +210,6 @@ wrapper 2 引导你：
 /mj-nlm:query              # 仅问答（6 种 Mode）
 /mj-nlm:manage             # 生命周期管理
 /mj-nlm:auth               # 认证维护
-/mj-nlm:learn              # ⚠ v2.2 deprecated，请改用 learn-make + learn-test
 ```
 
 ## 自然语言触发
@@ -226,9 +237,10 @@ wrapper 2 引导你：
 - ✅ v2.0.1：mj-agent 实际目录路径定稿（6-scope 方案 B：code / tool / skill / prompt / docs / cross）
 - ✅ v2.1：默认 record mode（全在线 + 元信息 markdown），二进制 download 降级为 opt-in
 - ✅ v2.2：高层入口整合（`/mj-nlm:learn-make` + `/mj-nlm:learn-test`），旧 `/mj-nlm:learn` 标 deprecated
-- v2.3：移除 v2.2 deprecated 的 `/mj-nlm:learn` skill；调研 NLM artifact-level URL 暴露能力（v2.1 回退方案 B → 若 NLM 暴露则升级）
-- v2.4：Hooks 自动检测过期 24h 复述提醒 + marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
-- v2.5：移除 v1 `legacy_*` prompt 别名
+- ✅ v2.3：移除 v2.2 deprecated 的 `/mj-nlm:learn` skill；新增 preflight-checklist + quota-estimation 两份共享规范
+- v2.4：将 preflight L1+L2 实际编进各 skill Phase 0 实施代码（v2.3 仅文档化）；NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 升级）
+- v2.5：Hooks 自动检测过期 24h 复述提醒 + marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
+- v2.6：移除 v1 `legacy_*` prompt 别名
 - v2.x：英文 prompt 模板支持（v2.0 仅中文）；按需评估独立 mj-nlm-record skill（用于历史 artifact 补录）
 
 ## 许可
