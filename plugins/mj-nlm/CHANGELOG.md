@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05-08
+
+### 升级主旨
+
+把 v2.0 引入的单一编排器 `/mj-nlm:learn` 拆为两个语义对偶的 high-level wrapper：`/mj-nlm:learn-make`（生成学习资料）+ `/mj-nlm:learn-test`（生成考察资料）。用户对外只需记 2 个命令，底层 6 skill 仍可独立调用。**非破坏性 UX 优化**。
+
+### Added
+
+- **新增 skill `mj-nlm-learn-make`**（wrapper 1，学习侧编排器）：
+  - 4 Phase：Notebook Locate → Build (条件) → Artifact Mix Selection (AskUserQuestion 多选 7 类) → Studio Iteration (循环 record mode)
+  - 启动标志：`<topic>` / `--resume <nb_id>` / `--triple-view` / `--with-download` / `--download-only`
+  - 复用底层 `build` (Phase 1) + `studio` (Phase 3)，纯 dispatch 不重写
+  - H1-H4 涵盖 build 失败 / 多选为空 / 单类失败 / 来源不足
+- **新增 skill `mj-nlm-learn-test`**（wrapper 2，考察侧编排器）：
+  - 3 Phase（含 4 子分支 2a/2b/2c/2d）：Notebook Locate → Assessment Mix Selection (默认锁 quiz+flashcards，D/F/E 需勾) → Quiz/Flashcards 生成 → 错题归因/自检/来源核查
+  - 启动标志：`<nb_id>` / `--full` / `--rootcause` / `--selfcheck` / `--sourcecheck`
+  - 复用底层 `studio` (Phase 2a) + `query` Mode D/F/E (Phase 2b/2c/2d)
+  - H0/H1/H2a/H2b/H2d 涵盖无 notebook / 取消默认锁 / studio 失败 / 错题空 / 高风险强制核查
+- **新增自然语言触发词**：「生成学习资料 / 一键学习材料」 → learn-make；「生成考察资料 / 出题 / 错题归因 / 自检 / 来源核查」 → learn-test
+
+### Changed
+
+- **mj-nlm-learn SKILL.md frontmatter** description 前缀加 `[DEPRECATED v2.2 — use /mj-nlm:learn-make + /mj-nlm:learn-test 串联替代]`
+- **mj-nlm-learn SKILL.md body** 顶加 v2.2 迁移段（含 v2.1 → v2.2 的 Phase 对照表）；保留全部 10 Phase 原文供 v2.3 删除前回滚
+- **CLAUDE.md**：v2.2 升级要点段；6 skill 表 → 8 skill 表（拆分为 high-level wrapper + 底层 skill 两段）；文件结构 + skill 调用约定
+- **README.md**：v2.2 顶引；6 命令 → 8 命令表（同样拆两段）；新增「v2.2 核心新概念」段（高层入口 / 完整闭环示例 / 与 v2.1 关系）；快速上手段重写为「两 wrapper 串联」；自然语言触发段加 learn-make / learn-test 触发词；roadmap 标 v2.2 完成、v2.3-v2.5 重排
+- **plugin.json**：version 2.1.0 → 2.2.0；description 加 v2.2 高层入口说明；keywords 新增 `learn-orchestration` / `high-level-wrapper` / `learn-make` / `learn-test`
+
+### Deprecated
+
+- **`/mj-nlm:learn`** — v2.0 引入的单一编排器；v2.2 起标 deprecated，由 `/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联替代；保留至 v2.3 删除（约 2-3 周观察期），现有 v2.0/v2.1 用户不受影响
+
+### Migration（v2.1 → v2.2）
+
+| v2.1 `/mj-nlm:learn` 阶段 | v2.2 替代 |
+|---|---|
+| Phase 0-1（来源准备 + build） | `/mj-nlm:learn-make <topic>` 内置 Phase 1 (build 条件触发) |
+| Gate 1（00c 审定） | 下沉到 build skill Phase 7 H-point；如需强审定可单独 `/mj-nlm:build` |
+| Phase 2-5（mind_map / video / slide / audio） | `/mj-nlm:learn-make` Phase 2 多选 + Phase 3 循环 |
+| Phase 6（quiz + flashcards） | `/mj-nlm:learn-test <nb_id>` Phase 2a（默认锁定） |
+| Phase 7（Mode D 错题归因） | `/mj-nlm:learn-test --rootcause <nb_id>` 或 Phase 1 勾选 |
+| Phase 8（Mode F 自检） | `/mj-nlm:learn-test --selfcheck <nb_id>` 或 Phase 1 勾选 |
+| Phase 9（Mode E 来源核查） | `/mj-nlm:learn-test --sourcecheck <nb_id>` 或 Phase 1 勾选 |
+| `--triple-view` | `/mj-nlm:learn-make --triple-view <topic>` |
+| `--with-download` / `--download-only` | 同名标志，wrapper 1/2 均支持透传 |
+| `--resume <nb_id>` | `/mj-nlm:learn-make --resume <nb_id>`（兼容旧 `learn-phase:G{N}-passed` tag） |
+| `--lite` / `--quiz-only` | wrapper 1 不选 video / wrapper 2 默认即等价 |
+
+完整 v2.2 替代流程：`/mj-nlm:learn-make <topic>` → notebook + 学习资料 → `/mj-nlm:learn-test <nb_id>` → 考察资料 + 自检
+
+### Known Issues / Roadmap
+
+- v2.3 计划删除 deprecated 的 `/mj-nlm:learn`（约 2-3 周观察期后）
+- v2.2 wrapper description 与底层 studio/build/query description 关键词存在重叠 → agent 分发时按 wrapper 强标识词「编排 / orchestrate / 一键 / wrapper」+ 反向「Do not use for: 单步...」三段消歧；如发现 agent 分发摇摆，会在 v2.2.x patch 强化 description
+- 旧 v2.0/v2.1 `/mj-nlm:learn --resume <nb_id>` 流程可由 `/mj-nlm:learn-make --resume` 无缝接管（共享 `learn-phase:G{N}-passed` tag）
+
 ## [2.1.0] - 2026-05-08
 
 ### 升级主旨
