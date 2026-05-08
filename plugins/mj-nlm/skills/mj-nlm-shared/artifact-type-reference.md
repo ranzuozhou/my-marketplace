@@ -1,5 +1,7 @@
 # Artifact Type Reference — Studio 制品类型速查
 
+> **v2.1 默认行为变更**：studio Phase 4 默认输出 **metadata record markdown**（详见 `→ ./artifact-metadata-template.md`），不再强制 `download_artifact` 到本地。下方各类型的「**下载**：」字段保留为 opt-in 路径（`--mode download` 或 `--mode both`）。
+
 ## 9 种 artifact_type 参数速查
 
 | # | artifact_type | 中文名 | 输出格式 | 适用场景 |
@@ -191,6 +193,44 @@ for view in ("foundation", "structural", "challenge"):
 ### `focus_prompt_template`（v1 兼容别名）
 
 `legacy_*` 别名（v2.0 / v2.1 / v2.2 仍可用，v2.3 抛 deprecation warning，v2.4 移除）。详见 `focus-prompt-templates.md` 末尾的 v1→v2 兼容性表。
+
+## v2.1 输出模式（record / download / both）
+
+studio Phase 4 通过 `--mode` 参数控制输出形态：
+
+| `--mode` | 输出 | 默认 | 适用 |
+|---|---|---|---|
+| `record` | 元信息 markdown（≤ 50 行 body，详见 `→ ./artifact-metadata-template.md`） | ✅ | 学习闭环、团队共享、长期沉淀；二进制不入 git |
+| `download` | 二进制本地文件（按下方各类型 `**下载**：` 行指定的格式） | — | 离线分享、外部演示、归档备份 |
+| `both` | 同时输出 record markdown + 二进制 | — | 学习+归档场景；二进制由用户自存（不入 git） |
+
+### record mode 与各 artifact_type 的关系
+
+record markdown 不复述制品内容，只记录：notebook_id / artifact_type / view / focus_prompt_summary / 在线访问入口 / 与项目侧学习文档的双向 wikilink。
+
+| artifact_type | 在线访问可读性 | record markdown 必要性 | 备注 |
+|---|---|---|---|
+| `audio` / `video` | ✅ NLM 直接播放 | 高（pinpoint focus prompt 与 view） | binary 大（17-55 MB） |
+| `slide_deck` / `infographic` | ✅ NLM 内嵌显示 | 高 | binary 中等（PDF/PNG） |
+| `report` | ✅ NLM Markdown 渲染 | 中（也可只复制 markdown 进 git） | 全文进 git 需另行决策 |
+| `flashcards` / `quiz` | ✅ NLM 答题界面 | 高（quiz 错题归因要回到 NLM） | binary JSON/MD 小 |
+| `data_table` | ⚠ NLM 显示表格但不易复制 | 中（可考虑 both） | CSV 小但常需离线分析 |
+| `mind_map` | ✅ NLM 交互可视化 | 高（不在线无法看完整图） | JSON binary 小 |
+
+> **决策建议**：默认 `record`；学习/分享/归档复合场景用 `both`；纯离线/无网络场景用 `download`。
+
+### Phase 4 触发逻辑（v2.1）
+
+```
+studio Phase 4 入参：mode
+  ├─ record (默认) → 渲染 record.md → 提示 vault 路径
+  ├─ download    → 调用 download_artifact → 提示本地路径（不入 git）
+  └─ both        → record 优先，再 download
+```
+
+详见 `→ ../mj-nlm-studio/SKILL.md#Phase 4: Output Capture`。
+
+---
 
 ## download_artifact 参数参考
 

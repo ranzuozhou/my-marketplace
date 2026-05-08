@@ -6,10 +6,13 @@ description: >
   NotebookLM生成, NLM Studio, 制品下载, 下载音频, 下载视频,
   生成零基础版/结构版/挑战版的单个制品, 同主题三版（同 artifact_type）,
   关闭/启用幻觉防护约束, 修订 slide_deck,
+  只要 metadata, 不下载, 只要元信息, 在线引用, 在线只读, 元信息记录,
+  metadata only, 全在线模式, record artifact metadata, online reference, no download,
   generate nlm artifact, create audio overview, create slide deck,
   create report, generate infographic, generate mind map,
   nlm studio create, download nlm artifact, foundation/structural/challenge view,
-  triple view (single artifact_type), learning oriented artifact, disable_guardrails.
+  triple view (single artifact_type), learning oriented artifact, disable_guardrails,
+  record_artifact_metadata, metadata only mode, online only artifact.
   Do not use for: 创建/重建 notebook 与导入 source (use mj-nlm:build),
   完整学习闭环（含 build + 多种制品 + quiz + 自检） (use mj-nlm:learn),
   知识问答/错题归因/来源核查/理解度自检 (use mj-nlm:query),
@@ -20,7 +23,13 @@ description: >
 
 ## Overview
 
-基于已有 NotebookLM notebook 生成 Studio 制品（音频/视频/信息图/幻灯片/报告/闪卡/测验/数据表/思维导图共 9 种类型）并下载到本地。通过 Focus Prompt 三层拼接策略 + 学习视角（view）控制制品内容方向。
+基于已有 NotebookLM notebook 生成 Studio 制品（音频/视频/信息图/幻灯片/报告/闪卡/测验/数据表/思维导图共 9 种类型）。通过 Focus Prompt 三层拼接策略 + 学习视角（view）控制制品内容方向。Phase 4 输出形态由 `--mode` 参数控制：默认渲染 record markdown 元信息（v2.1），可选下载二进制或两者并存。
+
+v2.1 升级要点（相比 v2.0）：
+- **Phase 4 三模式**：`--mode record`（默认，输出元信息 markdown）/ `--mode download`（仅下载二进制）/ `--mode both`（两者并存）
+- **默认行为变更**：不再强制 `download_artifact` 到本地，对齐 mj-system / mj-agent learning 子系统「markdown 进 git，binary 永不入 git」约束
+- **新增 record 模板引用**：`→ ../mj-nlm-shared/artifact-metadata-template.md` 定义 frontmatter schema + ≤ 50 行 body 范式
+- **向后兼容**：现有 v2.0 用户的 download 路径仍可用（`--mode download`），仅默认值变化
 
 v2 升级要点（相比 v1）：
 - **学习导向 prompt**：focus-prompt-templates.md v2 全部重写为「学习闭环」导向（少术语 / 多类比 / 概念地图 / 反例 / 案例机制），不再仅服务 MJ 内部技术分享
@@ -39,12 +48,15 @@ v2 升级要点（相比 v1）：
 
 | 已知信息 | 行动 |
 |---|---|
-| "给 DQV 知识库生成音频" | 定位 notebook → 选 audio → Phase 2 |
+| "给 DQV 知识库生成音频" | 定位 notebook → 选 audio → Phase 2 → Phase 4 默认 record |
 | "生成幻灯片" 但未说明 notebook | Phase 1 列出 notebook 供选择 |
-| "下载上次生成的视频" | 跳到 Phase 4（Download） |
+| "下载上次生成的视频" | 跳到 Phase 4，`--mode download` |
 | "修改幻灯片第 3 页" | 使用 `studio_revise()` 修订 |
-| **"生成同主题的三版" / "零基础版+结构版+挑战版"**（v2） | Phase 2 选 view 模式 → 触发三次 studio_create |
+| **"生成同主题的三版" / "零基础版+结构版+挑战版"**（v2） | Phase 2 选 view 模式 → 触发三次 studio_create → Phase 4 三份 record（或 download） |
 | **"内部技术分享，不要约束句"**（v2 慎用） | Phase 2 设 `disable_guardrails=True`（高风险标签 notebook 强制忽略） |
+| **"只要 metadata / 不下载 / 在线引用"**（v2.1 默认） | Phase 4 `--mode record`（默认即此） |
+| **"既要 metadata 也要本地 mp3/pdf / 学习+归档"**（v2.1） | Phase 4 `--mode both` |
+| **"必须本地有二进制 / 离线分享"**（v2.1 opt-in） | Phase 4 `--mode download` |
 
 ---
 
@@ -67,7 +79,10 @@ digraph nlm_studio {
     P3 [label="Phase 3: Studio Create\nstudio_create + status 轮询\n(三版 = 3 次循环)"];
     H3 [label="H3: 生成失败/超时", shape=diamond, style=filled, fillcolor="#ffffcc"];
 
-    P4 [label="Phase 4: Download & Rename\ndownload_artifact + rename"];
+    P4 [label="Phase 4: Output Capture\nmode 路由 (record / download / both)"];
+    P4_R [label="Phase 4a record (默认)\n抽 metadata → 渲染 record.md"];
+    P4_D [label="Phase 4b download (opt-in)\ndownload_artifact + rename"];
+    P4_B [label="Phase 4c both (学习+归档)\nrecord → download"];
 
     DONE [label="完成", shape=doublecircle];
 
@@ -86,7 +101,12 @@ digraph nlm_studio {
     H3 -> P3 [label="重试"];
     P3 -> P4;
 
-    P4 -> DONE;
+    P4 -> P4_R [label="--mode record (默认)"];
+    P4 -> P4_D [label="--mode download"];
+    P4 -> P4_B [label="--mode both"];
+    P4_R -> DONE;
+    P4_D -> DONE;
+    P4_B -> DONE;
 }
 ```
 
@@ -234,11 +254,67 @@ for view in ("foundation", "structural", "challenge"):
 
 ---
 
-### Phase 4: Download & Rename
+### Phase 4: Output Capture
 
-**下载制品到本地并重命名。**
+**v2.1 三模式输出。** 通过 `--mode` 参数选择制品产出形态：
 
-1. 下载制品：
+| `--mode` | 输出 | 默认 | 适用场景 |
+|---|---|---|---|
+| `record` | 元信息 markdown（≤ 50 行 body） | ✅ | 学习闭环、团队共享、长期沉淀；二进制不入 git |
+| `download` | 二进制本地文件 | — | 离线分享、外部演示、归档备份 |
+| `both` | record + binary | — | 学习+归档场景 |
+
+**模式不明确时**：默认走 `record`；如检测到用户语境含「下载」「本地」「mp3 / mp4 / pdf 文件」「离线」等关键词则提议 `download` 或 `both`，由用户确认。
+
+#### Step 4.0：重命名 NLM 上的制品标题（所有模式通用）
+
+无论何种 mode，都先重命名为人类可读标题，便于在 NotebookLM Studio 面板内定位：
+
+```python
+studio_status(notebook_id, action="rename", new_title="{中文标题}")
+```
+
+例：`"DQV 三阶段管道技术概述（结构版）"`
+
+---
+
+#### Step 4a — `--mode record`（默认）
+
+**渲染元信息 markdown 到 vault，不调用 download_artifact。**
+
+1. 调用 `studio_status(notebook_id)` 抽取制品元信息：
+   - `artifact_id`（若 NLM 不返回 → 填 `unknown`）
+   - `artifact_url`（v2.1 NLM 暂不暴露 artifact-level URL → 回退方案 B：与 `notebook_url` 同值）
+   - `created_at`
+   - 制品标题（Step 4.0 重命名后的值）
+
+2. 询问用户输出路径（建议 `learning/<topic>/_nlm/<file>.md`）：
+   - mj-system 项目：`<vault>/learning/<topic>/_nlm/`
+   - mj-agent 项目：`<vault>/learning/<topic>/_nlm/`
+   - 临时探索：`<vault>/_scratch/_nlm/`
+
+3. 按 `→ ../mj-nlm-shared/artifact-metadata-template.md` 的 schema 渲染 markdown：
+   - frontmatter 字段全填（`type: nlm-artifact-record` / `notebook_id` / `artifact_type` / `view` / `notebook_url` / `artifact_url` / `focus_prompt_summary` / `guardrails_enabled` / `created` / `state: active` / `version: v1.0`）
+   - body ≤ 50 行：主题（2-3 行）/ 在线访问 / Focus Prompt 关键参数 / 与项目的关系 / 变更历史
+
+4. 命名约定：`<artifact_type>-<view>-<short-topic>.md`
+   - 例：`audio-foundation-dqv-overview.md`、`slide_deck-default-langgraph-agent-design.md`
+
+5. 提示用户：
+   - 渲染后的 record.md 路径
+   - 「在线访问」段的 NotebookLM URL
+   - 提醒：本 record markdown 进 git；二进制不在本地保存
+
+**v2 三版命名后缀**：
+- `audio-foundation-{topic}.md`
+- `audio-structural-{topic}.md`
+- `audio-challenge-{topic}.md`
+
+---
+
+#### Step 4b — `--mode download`（opt-in）
+
+**沿用 v2.0 行为，下载二进制到本地。**
 
 ```python
 download_artifact(
@@ -249,20 +325,26 @@ download_artifact(
 )
 ```
 
-默认下载路径：项目根目录下 `nlm-artifacts/`。
+默认下载路径：项目根目录下 `nlm-artifacts/`（用户可覆盖）。
 
 **v2 三版命名后缀**：
 - `nlm-artifacts/{title}-foundation.mp3`
 - `nlm-artifacts/{title}-structural.mp3`
 - `nlm-artifacts/{title}-challenge.mp3`
 
-2. 重命名 NLM 上的制品标题：
+**重要提示**：本模式输出物（mp3 / mp4 / pdf 等）**不应**进入 git 仓库。在 mj-system / mj-agent learning 子系统场景下，二进制必须放在 vault `_scratch/` 或独立非 git 目录。
 
-```python
-studio_status(notebook_id, action="rename", new_title="{中文标题}")
-```
+---
 
-例：`"DQV 三阶段管道技术概述（结构版）"`
+#### Step 4c — `--mode both`（学习+归档）
+
+**先 record，再 download**：
+
+1. 执行 Step 4a（渲染 record markdown 到 `learning/<topic>/_nlm/`）
+2. 执行 Step 4b（下载二进制到用户指定路径，建议 `_scratch/` 或 vault 外）
+3. 在 record.md 的「变更历史」段附加一行：`<YYYY-MM-DD>：本制品同时本地化为 <download_path>`
+
+**适用场景**：学习闭环要 record（团队共享 + git 沉淀），同时本地保留二进制做离线复习/外部分享。
 
 ---
 
@@ -293,12 +375,14 @@ studio_revise(
 | **H2** | Conditional | 用户未指定 artifact_type 或需求不明确 | 展示 9 种类型 + view 选项 |
 | **H3** | Warning | studio_create 失败或轮询超时 | 重试 / 更换类型 / 检查 notebook 内容 |
 | **H4** | Hard Block（**v2 新增**） | 来源充足性预检 BLOCK（如 1 页 PDF 请求 audio_long） | 强制降级 artifact_type 或提示先 `/mj-nlm:build` 补来源 |
+| **H5** | Conditional（**v2.1 新增**） | Phase 4 mode 不明确（用户未指定且语境模糊） | 默认 `record`；如检测到「下载/本地/离线/mp3 文件」等关键词则 AskUserQuestion 在 record / download / both 三选一 |
+| **H6** | Conditional（**v2.1 新增**） | Phase 4 record 模式但用户未指定输出路径 | 提议默认路径（mj-system: `learning/<topic>/_nlm/`；其他：用户输入） |
 
 ---
 
 ## Handoff
 
-制品生成完成后输出：
+制品生成完成后输出（按 mode 分形态）：
 
 ```
 制品生成完成
@@ -306,8 +390,21 @@ studio_revise(
 Notebook: {notebook_name}
 制品类型: {artifact_type}（view={view}, 子参数={...}）
 标题: {中文标题}
-下载路径: {output_path}
 约束句: {applied / disabled / forced（high-risk 强制开）}
+输出模式: {record | download | both}
+
+# --mode record（v2.1 默认）
+record markdown: {record_path}
+NotebookLM URL: {notebook_url}
+进 git: ✅（仅 markdown）
+
+# --mode download
+本地二进制: {output_path}
+进 git: ❌（本地保留，请勿提交）
+
+# --mode both
+record markdown: {record_path}（进 git）
+本地二进制: {output_path}（不进 git）
 
 下一步:
   - 完整学习闭环 → /mj-nlm:learn
@@ -320,7 +417,7 @@ Notebook: {notebook_name}
 
 ## Examples
 
-### 示例 1：三版音频生成（v2 新场景）
+### 示例 1：三版音频生成（v2 + v2.1 默认 record）
 
 ```
 用户：给 DQV 生成三版深度学习音频
@@ -328,7 +425,24 @@ Notebook: {notebook_name}
 → Phase 2：artifact_type=audio, audio_format=brief（foundation） / default（structural & challenge）, view 三轮
 → Phase 2.3：三个 Intent Layer 模板分别填充，Content Layer 抽 00c 定向报告概念，Guardrails 默认追加
 → Phase 3：循环 3 次 studio_create（约 9 分钟）
-→ Phase 4：下载 3 个文件 → DQV-foundation.mp3 / DQV-structural.mp3 / DQV-challenge.mp3
+→ Phase 4 (--mode record 默认)：
+   渲染 3 份 record markdown 到 learning/dqv/_nlm/
+     - audio-foundation-dqv-overview.md
+     - audio-structural-dqv-overview.md
+     - audio-challenge-dqv-overview.md
+   每份含 NotebookLM URL + focus prompt 摘要 + 与 [LEARNING]_DQV.md 的双向 wikilink
+   不下载任何 mp3
+```
+
+### 示例 1b：三版音频 + 离线归档（v2.1 both 模式）
+
+```
+用户：给 DQV 生成三版音频，要 metadata 也要本地 mp3
+→ Phase 1-3 同示例 1
+→ Phase 4 (--mode both)：
+   1) 渲染 3 份 record markdown 到 learning/dqv/_nlm/
+   2) 下载 3 份 mp3 到 ~/Downloads/nlm-archive/dqv/
+   3) record.md 的「变更历史」追加：2026-05-08：本制品同时本地化为 ~/Downloads/nlm-archive/dqv/<title>-<view>.mp3
 ```
 
 ### 示例 2：内部技术分享关闭约束句（v2 慎用）
@@ -371,11 +485,38 @@ Notebook: {notebook_name}
 → v2.3 此选项弃用，v2.4 移除
 ```
 
+### 示例 6：v2.1 record 单制品（新场景）
+
+```
+用户：把 DQV 知识库生成一份 mind_map，但只要在线引用，不要下载 JSON
+→ Phase 1：定位 MJ-system-mod-DQV-20260506
+→ Phase 2：artifact_type=mind_map, view=default, language=zh
+→ Phase 3：studio_create + 轮询完成
+→ Phase 4 (--mode record)：
+   - studio_status 抽 artifact_url（NLM 不暴露 → 回退 notebook_url）
+   - 询问输出路径 → learning/dqv/_nlm/
+   - 渲染 mind_map-default-dqv-overview.md（≤ 50 行 body）
+   - frontmatter 含 notebook_url + 「在 notebook 内定位本制品」段
+→ Handoff：本 record 进 git；二进制无；用户在 NotebookLM 在线浏览思维导图
+```
+
+### 示例 7：v2.1 download 显式离线（opt-in）
+
+```
+用户：v2.0 那种把 audio mp3 下到本地的旧行为还可以用吗？给我下一份
+→ Phase 1-3 同
+→ Phase 4 (--mode download)：
+   - download_artifact → ~/Downloads/nlm-artifacts/<title>.mp3
+   - 提示用户：本文件 5-55 MB，请勿提交到 git
+→ 与 v2.0 行为一致；没有 record markdown 输出
+```
+
 ---
 
 ## Reference Files
 
-- **`→ ../mj-nlm-shared/artifact-type-reference.md`** — 9 种 artifact_type 子参数详情 + v2 横切子参数（view / disable_guardrails / focus_prompt_template）
+- **`→ ../mj-nlm-shared/artifact-type-reference.md`** — 9 种 artifact_type 子参数详情 + v2 横切子参数（view / disable_guardrails / focus_prompt_template）+ v2.1 三输出模式
+- **`→ ../mj-nlm-shared/artifact-metadata-template.md`** — **v2.1 新增**：record markdown frontmatter schema + ≤ 50 行 body 范式 + 命名与存放规范
 - **`→ ../mj-nlm-shared/focus-prompt-templates.md`** — Intent Layer 模板（v2 学习导向，按 artifact_type × view 组合）
 - **`→ ../mj-nlm-shared/risk-control-templates.md`** — Guardrails Layer 约束句 + 预检矩阵 + 高风险类别
 - **`→ ../mj-nlm-shared/learning-loop-templates.md`** — 三版提示词、Glossary 模板、机制分析模板
