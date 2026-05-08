@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-05-08
+
+### 升级主旨
+
+诚实化 v2.4 中关于 5min 缓存机制的描述——v2.4.1 调研后确认 v2.4 SKILL.md 与 preflight-checklist.md 写的"5 分钟内同会话已通过 → 跳过"是 Claude conversation 自然 memory 行为，**不是真实现的技术 cache**。本 patch 把所有 cache 指令改为诚实描述，沉淀 v2.5 候选 abandoned 决策依据。
+
+### Changed
+
+- **mj-nlm-shared/preflight-checklist.md** §缓存策略：从"5min TTL + 内存级 dict"重写为"v2.4.1 诚实化"段，含实际机制（同 turn LLM 自然 memory / 跨 turn 重跑）+ 单调用真实开销表（server_info / refresh_auth 毫秒级 LOCAL；notebook_list 1-3 秒网络）+ v2.5 候选 abandoned 4 条决策依据
+- **build / manage / studio / query** 4 个 skill 的 Phase 0 缓存段：删除"5 分钟内"+ "--force-recheck" 措辞，改为统一引述 preflight-checklist §缓存策略
+- 删除 `--force-recheck` flag 引用（从未实现，仅文档化指令）
+
+### Investigation Findings（v2.5 候选 abandoned 决策依据）
+
+调研 [`notebooklm-mcp-cli` v0.6.5](https://github.com/jacob-bd/notebooklm-mcp-cli)（`C:\Users\Admin\AppData\Roaming\uv\tools\notebooklm-mcp-cli\Lib\site-packages\notebooklm_tools\`）源码：
+
+1. **`server_info`** 是 LOCAL check（`mcp/tools/server.py:77-79` 注释明示：`auth_status is a LOCAL check ... It does NOT make a live Google API call`），毫秒级开销
+2. **`refresh_auth`** 是 disk reload（`mcp/tools/auth.py:42-50`），命中 disk cache 时也是毫秒级；headless Chrome fallback 才慢
+3. **`notebook_list`** 是真网络调用（`mcp/tools/notebooks.py:9-22` → `services.notebooks.list_notebooks(client)`），1-3 秒
+
+**结论**：v2.4 的 5min 缓存指令实际只对 `notebook_list` 有缓存价值；但它是用户日常 API（不只用于 preflight），缓存会让刚建/刚删 notebook 反映不准；fork 维护成本高于跨 turn 多跑一次的体验损失。**v2.5 候选 abandoned**（accepted v2.4 现状）。
+
+### Roadmap 更新
+
+- ~~v2.5 候选：preflight 5min 缓存机制升级为真实现~~ → **abandoned**（ROI 低，见 Investigation Findings）
+- v2.5 重命名：NLM artifact-level URL 暴露调研（v2.1 回退方案 B → 升级；之前 v2.6 候选）
+- v2.6 候选：Hooks 自动检测 24h 复述提醒
+- v2.7 候选：移除 v1 `legacy_*` prompt 别名
+
 ## [2.4.0] - 2026-05-08
 
 ### 升级主旨
