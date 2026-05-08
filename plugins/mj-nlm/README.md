@@ -1,5 +1,7 @@
 # mj-nlm — NotebookLM Learning-Loop Plugin for Claude Code
 
+> **v2.1 — 全在线 + Metadata-Only 默认行为**：studio Phase 4 默认输出元信息 markdown（record mode），二进制 download 降级为显式 opt-in；对齐 learning 子系统「markdown 进 git，binary 永不入 git」约束。
+>
 > **v2.0 — MJ-AgentLab 学习闭环版**：从"被动产出制品"重构为"学习闭环"（依据方法论文档），覆盖 mj-system + mj-agent 双项目。
 
 MJ-AgentLab NotebookLM 技能家族，把 NotebookLM 多媒体当作「理解脚手架」，先降低进入陌生主题的成本，再用领域定向报告 / 三版生成 / Quiz 错题反馈 / 来源核查 / 理解度自检完成完整学习闭环。
@@ -12,8 +14,38 @@ MJ-AgentLab NotebookLM 技能家族，把 NotebookLM 多媒体当作「理解脚
 | `/mj-nlm:build` | 创建知识库（扫描 → 导入 → 打标签 → **来源充足性预检 → 领域定向报告**） |
 | `/mj-nlm:manage` | 管理知识库（Notebook / Source / Tag CRUD + 分享） |
 | `/mj-nlm:query` | 知识问答（**6 种 Mode**：Single / Cross / Deep Research / Quiz Root Cause / Source Check / Self-Check） |
-| `/mj-nlm:studio` | Studio 制品生成（9 种类型 × **4 view 视角** + **默认幻觉防护**） |
-| `/mj-nlm:learn` | **学习闭环编排器**：10 Phase + 5 Gate 一键走完「来源准备 → 领域定向 → mind_map → video → slide → audio → quiz → 错题 root cause → 来源核查 → 理解度仪表盘」 |
+| `/mj-nlm:studio` | Studio 制品生成（9 种类型 × **4 view 视角** + **默认幻觉防护** + **v2.1 record/download/both 三输出模式**，默认 record） |
+| `/mj-nlm:learn` | **学习闭环编排器**：10 Phase + 5 Gate 一键走完「来源准备 → 领域定向 → mind_map → video → slide → audio → quiz → 错题 root cause → 来源核查 → 理解度仪表盘」（**v2.1 默认走 record，加 `--with-download` 才本地化**） |
+
+## v2.1 核心新概念
+
+### 默认 record mode（元信息 markdown）
+
+studio Phase 4 默认不再调用 `download_artifact` 把二进制写到本地，而是渲染一份元信息 markdown 到用户指定路径（建议 `learning/<topic>/_nlm/<artifact>.md`），包含：
+
+- frontmatter：notebook_id / artifact_type / view / focus_prompt_summary / 在线访问 URL / 与项目侧学习文档的双向 wikilink
+- body（≤ 50 行）：主题、在线访问入口、focus prompt 关键参数、与项目的关系、变更历史
+
+完整范式见 `skills/mj-nlm-shared/artifact-metadata-template.md`。
+
+### 三输出模式（`--mode`）
+
+| `--mode` | 输出 | 默认 | 适用 |
+|---|---|---|---|
+| `record` | 元信息 markdown（< 4 KB） | ✅ | 学习闭环、团队共享、长期沉淀；二进制不入 git |
+| `download` | 二进制本地文件（5-55 MB） | — | 离线分享、外部演示、归档备份 |
+| `both` | record + binary | — | 学习+归档场景 |
+
+### 与 learning 子系统对齐
+
+mj-system / mj-agent learning 子系统的强约束：
+- ✅ markdown 学习文档进 git
+- ❌ mp3 / mp4 / pdf 等二进制**永不入 git**（17-55 MB / 单文件）
+- ✅ NotebookLM 产物**全部在线托管**
+
+v2.1 默认行为正好对齐该约束，learn skill 编排默认走 record 路径。
+
+---
 
 ## v2 核心新概念
 
@@ -130,6 +162,8 @@ skill 会引导你：
 - "走完 NLM 学习闭环 / 一站式学习" → `/mj-nlm:learn`
 - "建知识库 / 生成领域定向报告" → `/mj-nlm:build`
 - "生成三版音频 / 零基础版+结构版+挑战版" → `/mj-nlm:studio`
+- "只要 metadata / 不下载 / 在线引用 / online reference" → `/mj-nlm:studio --mode record`（v2.1 默认）
+- "metadata + 本地副本 / 学习+归档" → `/mj-nlm:studio --mode both`
 - "我做完 quiz 错了 5 题，分析下" → `/mj-nlm:query` Mode D
 - "刚才的回答靠谱吗，能找到来源吗" → `/mj-nlm:query` Mode E
 - "做一次理解度自检" → `/mj-nlm:query` Mode F
@@ -143,10 +177,11 @@ skill 会引导你：
 ## 未实现 / 未来 v2.x roadmap
 
 - ✅ v2.0.1：mj-agent 实际目录路径定稿（6-scope 方案 B：code / tool / skill / prompt / docs / cross）
-- v2.1：Hooks 自动检测过期 24h 复述提醒
-- v2.2：marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
-- v2.3：移除 v1 `legacy_*` prompt 别名
-- v2.x：英文 prompt 模板支持（v2.0 仅中文）
+- ✅ v2.1：默认 record mode（全在线 + 元信息 markdown），二进制 download 降级为 opt-in
+- v2.2：Hooks 自动检测过期 24h 复述提醒 + 调研 NLM artifact-level URL 暴露能力（v2.1 回退方案 B → 若 NLM 暴露则升级）
+- v2.3：marketplace 层"知识库健康度"看板（汇总 quiz 命中率与 source check 通过率）
+- v2.4：移除 v1 `legacy_*` prompt 别名
+- v2.x：英文 prompt 模板支持（v2.0 仅中文）；按需评估独立 mj-nlm-record skill（用于历史 artifact 补录）
 
 ## 许可
 
