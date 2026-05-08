@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-05-08
+
+### 升级主旨
+
+studio Phase 4 默认输出形态从「download 二进制到本地」改为「record 元信息 markdown」，对齐 mj-system / mj-agent learning 子系统的强约束（markdown 进 git，binary 永不入 git，NotebookLM 产物全部在线托管）。download 路径降级为显式 opt-in。
+
+### Added
+
+- **新增共享模板 `mj-nlm-shared/artifact-metadata-template.md`**：record markdown 范式（frontmatter schema + ≤ 50 行 body + 命名与存放约定 + 与 learning 子系统对齐说明 + record vs download 对比）
+- **studio skill Phase 4 三模式**：`--mode record`（默认）/ `--mode download`（opt-in）/ `--mode both`（学习+归档）
+- **studio skill 新增 H5 / H6**：H5（mode 不明确时根据语境关键词询问）/ H6（record 模式但未指定输出路径时提议默认路径）
+- **learn skill 新增标志**：`--with-download`（默认 record 之外同时下载，等同子调度 `mode=both`）/ `--download-only`（跳过 record 仅下载，等同 `mode=download`，v2.0 兼容）
+- **studio / learn description 关键词扩展**：`metadata only` / `record_artifact_metadata` / `online reference` / `no download` / `online only` / `全在线模式` / `不下载`
+
+### Changed
+
+- **studio skill SKILL.md Phase 4 重写**：原"Download & Rename"改为"Output Capture"，含 Step 4.0 重命名（通用） + Step 4a/4b/4c 三模式分支；workflow dot 图新增 P4_R / P4_D / P4_B 三节点
+- **studio skill Quick Start 表新增三行 v2.1 触发**：「只要 metadata」/「既要 metadata 也要本地」/「必须本地有二进制」
+- **studio skill Examples 新增**：示例 1b（三版 both）/ 示例 6（v2.1 record 单制品）/ 示例 7（v2.1 download 显式离线）
+- **learn skill Phase 2-6 调度参数加 mode 字段**：默认 record，从 learn 启动参数透传
+- **learn skill Gate 2/3/4 文案**：审定对象由「本地文件」改为「NotebookLM 在线制品」（artifact 完成 ≠ 必须本地化）
+- **learn skill Phase 6 quiz/flashcards 输出说明**：默认 record markdown 含 NotebookLM URL 用于在线答题；`--with-download` 时本地存 JSON 便于做题工具加载
+- **learn skill Handoff 输出**：按 mode 分形态展示 record / both / download 输出物
+- **learn skill 示例**：示例 1 改为 v2.1 默认 record；新增示例 1b（--with-download）
+- **`mj-nlm-shared/artifact-type-reference.md`**：顶部加 v2.1 默认行为变更说明；新增「v2.1 输出模式（record / download / both）」段（含 record mode 与 9 类 artifact_type 关系矩阵）
+- **CLAUDE.md**：v2.1 升级要点段；6 skill 表标 v2.1 升级；shared 文件计数 7 → 8；skill 调用约定新增 record mode 默认条目
+- **README.md**：v2.1 顶引；6 命令表更新；新增「v2.1 核心新概念」段（默认 record / 三模式 / 与 learning 子系统对齐）；自然语言触发段加 metadata only / both 触发词；roadmap 标 v2.1 完成
+- **plugin.json**：version 2.0.1 → 2.1.0；description 加 v2.1 默认行为说明；keywords 新增 `metadata-only` / `online-reference` / `record-mode`
+
+### Breaking Changes（仅 workflow 与默认值层，不动 MCP 接口）
+
+- **studio Phase 4 默认输出从 binary 改为 record markdown**——v2.0 用户脚本若依赖 `nlm-artifacts/<file>.<ext>` 路径下的二进制，需显式加 `--mode download` 或迁到 `--mode both`
+- **learn 默认走 record**——v2.0 学习闭环用户的本地 mp3/mp4/pdf 不再自动产生；如需保留旧行为加 `--with-download` 或 `--download-only`
+- 不影响：MCP 接口（download_artifact / studio_create / studio_status 调用方式与签名均不变）；现有 v2.0 录制的文件路径；focus prompt 模板与 view 子参数
+
+### Migration（v2.0 → v2.1）
+
+- **保留 v2.0 行为**：单步 `/mj-nlm:studio` 调用加 `--mode download`；编排器 `/mj-nlm:learn` 加 `--download-only` 或 `--with-download`（推荐后者，留下 record 沉淀）
+- **采纳 v2.1 默认**：直接执行不带 mode 的命令；首次执行时按 H6 提示提供 record 输出路径（建议 mj-system / mj-agent 项目用 `learning/<topic>/_nlm/`）
+- **历史 artifact 补录 record markdown**：v2.1 不提供独立 skill；如频繁补录，按 `artifact-metadata-template.md` 手动填一份；v2.x 路线图考虑加 mj-nlm-record skill
+- **NLM artifact-level URL 调研**：v2.1 采用回退方案 B（`artifact_url` 与 `notebook_url` 同值，body 内含「在 notebook 内定位本制品」段）；v2.2 路线图含 NLM API 能力调研，若上游暴露 artifact 直链则 record 模板自动升级
+
+### Known Issues / Roadmap
+
+- v2.1 NotebookLM artifact-level URL 暂回退方案 B（仅 notebook_url），若官方后续暴露则 v2.2 自动升级 record 模板
+- v2.1 不提供 mj-nlm-record 独立 skill；历史 artifact 补录需按模板手动填；v2.x 视使用频率决定是否加
+- v2.1 record markdown 路径默认提示 `learning/<topic>/_nlm/`，依赖用户 vault 已有该层级；mj-system / mj-agent learning 子系统 Phase 0 落地后此默认路径自动可用
+
 ## [2.0.1] - 2026-05-06
 
 ### Changed

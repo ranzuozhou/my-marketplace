@@ -7,9 +7,11 @@ description: >
   Includes: 走完NLM学习闭环, 一站式学习, 学习编排, NLM全流程学习, 系统学习陌生主题,
   把NotebookLM当学习脚手架, 多形态学习同主题（含 build + 多个 studio 制品 + query 闭环）,
   学习闭环, 自动从领域定向到测验, 闭环编排, 一键NLM学习, 端到端学习,
-  --resume / --quiz-only / --triple-view / --lite 模式,
+  全在线学习, 不下载二进制, 学习闭环 metadata only, --with-download 同时本地化,
+  --resume / --quiz-only / --triple-view / --lite / --with-download 模式,
   notebooklm full learning loop, end to end learning, learning orchestrator,
-  scaffolded learning workflow, multi-stage learning, complete learning cycle.
+  scaffolded learning workflow, multi-stage learning, complete learning cycle,
+  online only learning loop, metadata only learning, record mode learning.
   Do not use for: 单步建库 (use mj-nlm:build), 单步生成制品（即使是三版 audio）(use mj-nlm:studio),
   单步问答/错题分析/来源核查/自检 (use mj-nlm:query),
   notebook 管理或分享 (use mj-nlm:manage), 仅认证修复 (use mj-nlm:auth).
@@ -29,7 +31,9 @@ description: >
 
 10 个 Phase + 5 个 Gate（关键关口插入用户确认 / 修改 / 跳过选项）。learn skill **本身不调用 MCP**，全部通过调度 build / studio / query 三个 skill 完成。
 
-**前置 skill**：build / studio / query（v2 已升级）。**互补 skill**：manage（生命周期管理）。
+**v2.1 默认行为**：所有 studio 子调度默认 `--mode record`（仅渲染元信息 markdown，不下载二进制）。如需同时本地化二进制，启动时加 `--with-download`（等同于子调度 `--mode both`）。
+
+**前置 skill**：build / studio（v2.1 起含三模式 Phase 4） / query（v2 已升级）。**互补 skill**：manage（生命周期管理）。
 
 ## 设计哲学（来自方法论 §11/§12）
 
@@ -49,11 +53,13 @@ learn skill 的角色是**编排者**，不是**学习者**。它不做新的判
 
 | 命令 | 说明 |
 |---|---|
-| `/mj-nlm:learn <topic>` | 完整闭环（10 Phase + 5 Gate） |
+| `/mj-nlm:learn <topic>` | 完整闭环（10 Phase + 5 Gate）；**v2.1 默认 record mode**（不下载二进制） |
 | `/mj-nlm:learn --resume <notebook_id>` | 从某个 Gate 恢复（learn 把当前 Phase 写入 notebook tag） |
 | `/mj-nlm:learn --quiz-only <notebook_id>` | 仅走 P6/P7（已有 notebook 时复测） |
 | `/mj-nlm:learn --triple-view <topic>` | 三版生成（mind_map / video / slide / audio 各 3 版，配额 ×3） |
 | `/mj-nlm:learn --lite <topic>` | 跳过 video（或更耗时制品），适合配额有限或快速场景 |
+| `/mj-nlm:learn --with-download <topic>` | **v2.1 新增**：在默认 record 之外**同时**下载二进制到本地（等同子调度 `--mode both`） |
+| `/mj-nlm:learn --download-only <topic>` | **v2.1 新增**：跳过 record，仅下载二进制（等同子调度 `--mode download`，用于 v2.0 兼容场景） |
 
 ---
 
@@ -189,6 +195,8 @@ learn 触发：
   artifact_type=mind_map
   view=default（除非 --triple-view，则三版连续）
   language=zh
+  mode=record（v2.1 默认；--with-download 时为 both，--download-only 时为 download）
+  output_dir=learning/<topic>/_nlm/   # record 输出位置
 ```
 
 studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
@@ -197,12 +205,16 @@ studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
 
 ### Gate 2/3/4: Accept Each Artifact
 
-**对 mind_map / video / slide 各设一个 Gate。**
+**对 mind_map / video / slide 各设一个 Gate。** 注意：v2.1 起 Gate 审定的是「**制品在 NotebookLM 上的完成度**」，而非「本地二进制是否成功下载」——artifact 完成 ≠ 必须本地化。
 
 每个 Gate AskUserQuestion：
-- **接受**：进入下一 Phase
+- **接受**：进入下一 Phase（record markdown 已写入 `learning/<topic>/_nlm/`）
 - **重生**：返回该 Phase，可让用户提供新的 prompt 提示词或换 view（如 default → structural）
 - **跳过**：直接跳到下一 Phase（不影响后续 Quiz）
+
+**v2.1 Gate 文案变更**：
+- 旧（v2.0）："已下载到 nlm-artifacts/，是否接受？"
+- 新（v2.1 默认）："已生成 record markdown 到 `learning/<topic>/_nlm/<file>.md`，请打开 NotebookLM 链接确认内容，是否接受？"
 
 > audio（Phase 5）不设 Gate，因为 audio 是"低摩擦重复输入"性质，不必每次审定。如果想跳过 audio，用 `--lite` 启动。
 
@@ -210,7 +222,7 @@ studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
 
 ### Phase 3: Video Overview
 
-调度 `/mj-nlm:studio` 生成 video。
+调度 `/mj-nlm:studio` 生成 video（mode 从启动参数透传，默认 record）。
 
 `--triple-view` 模式下三版连续。`--lite` 模式下跳过本 Phase。
 
@@ -220,7 +232,7 @@ studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
 
 ### Phase 4: Slide Deck
 
-调度 `/mj-nlm:studio` 生成 slide_deck。
+调度 `/mj-nlm:studio` 生成 slide_deck（mode 从启动参数透传，默认 record）。
 
 `--triple-view` 模式下三版连续。
 
@@ -230,7 +242,7 @@ studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
 
 ### Phase 5: Audio Overview
 
-调度 `/mj-nlm:studio` 生成 audio。
+调度 `/mj-nlm:studio` 生成 audio（mode 从启动参数透传，默认 record）。
 
 默认 `audio_format=brief, audio_length=default`。`--triple-view` 模式下三版连续。
 
@@ -243,11 +255,16 @@ studio Phase 1-4 跑完后回到 learn 进入 Gate 2。
 **调度 `/mj-nlm:studio` 连续生成 quiz 和 flashcards。**
 
 ```
-quiz: question_count=10, difficulty=medium, view=default
-flashcards: difficulty=medium
+quiz: question_count=10, difficulty=medium, view=default, mode=record（默认）
+flashcards: difficulty=medium, mode=record（默认）
 ```
 
-下载后展示给用户，告知"请认真做完 quiz 再继续 Phase 7"。
+**特例**：`--with-download` 启动时，quiz/flashcards 也走 both，本地存 JSON/Markdown 便于做题工具加载（其他制品照旧）。
+
+生成完成后向用户提示：
+- record markdown 路径（含 NotebookLM URL 用于在线答题）
+- 若 download：本地 quiz.json / flashcards.json 路径
+- 告知"请打开 NotebookLM 在线答 quiz 或用本地文件，做完后回来给错题列表"
 
 learn 等待用户提供错题列表（粘贴或文件路径）才进入 Phase 7。
 
@@ -294,7 +311,7 @@ learn 在 Phase 8 末尾**统一写 Note**：`note(notebook_id, action="create",
 
 ### Handoff
 
-learn 完成后输出：
+learn 完成后输出（按 mode 分形态）：
 
 ```
 学习闭环完成 — {topic}
@@ -303,16 +320,21 @@ Notebook: {notebook_name}
 ID: {notebook_id}
 经历 Phase: P0 → P1 → G1 → P2 → G2 → P3 → G3 → P4 → G4 → P5 → P6 → P7 → G7 → P8 → P9
 跳过的 Phase: {如有}
+输出模式: {record (默认) | both (--with-download) | download (--download-only)}
 
-制品清单:
-- mind_map.json
-- video.mp4
-- slide_deck.pdf
-- audio.mp3
-- quiz.json
-- flashcards.json
-+ 元 source: 00a / 00b / 00c / 00d
-+ Note: 99-自检-理解度仪表盘-{YYYYMMDD}-{HHMM}
+# v2.1 默认 record mode 输出（mode=record）：
+制品 record markdown（learning/{topic}/_nlm/）:
+- mind_map-default-{topic}.md
+- video-default-{topic}.md
+- slide_deck-default-{topic}.md
+- audio-default-{topic}.md
+- quiz-default-{topic}.md
+- flashcards-default-{topic}.md
++ 元 source: 00a / 00b / 00c / 00d（在 NotebookLM 上）
++ Note: 99-自检-理解度仪表盘-{YYYYMMDD}-{HHMM}（在 NotebookLM 上）
+
+# 如启用 --with-download，额外本地二进制（不进 git，建议 _scratch/ 或 vault 外）：
+- mind_map.json / video.mp4 / slide_deck.pdf / audio.mp3 / quiz.json / flashcards.json
 
 理解度评级: {入门 / 熟悉 / 掌握}
 24h 回访预约: {YYYY-MM-DD HH:MM}（手动触发 /mj-nlm:query --mode=recall {notebook_id}）
@@ -324,6 +346,7 @@ Tag 自动添加: `learn-loop`
   - 24h 后复述 → /mj-nlm:query --mode=recall
   - 进入下一主题 → /mj-nlm:learn <new_topic>
   - 如发现领域定向报告需修订 → /mj-nlm:build --resume {notebook_id}（仅跑 P7）
+  - 如想后期本地化某 artifact → /mj-nlm:studio --mode download
 ```
 
 ---
@@ -377,27 +400,37 @@ learn 在每次 Gate 通过时写入 notebook tag：
 
 ## Examples
 
-### 示例 1：完整闭环（默认）
+### 示例 1：完整闭环（v2.1 默认 record）
 
 ```
 用户：/mj-nlm:learn DQV
 → Phase 0：引导上传 DQV 设计文档 + 代码 + 1 篇社区博客 + 用户写一段困惑
 → Phase 1：调度 build（命名 MJ-system-mod-DQV-20260505），生成 00a/00b/00c/00d
 → Gate 1：用户审 00c 定向报告 → 确认
-→ Phase 2：mind_map.json
-→ Gate 2：接受
-→ Phase 3：video.mp4
-→ Gate 3：重生（用户嫌太快） → 重生 → 接受
-→ Phase 4：slide_deck.pdf → 接受
-→ Phase 5：audio.mp3
-→ Phase 6：quiz.json + flashcards.json
-→ 用户做 quiz，错 5 题，粘贴错题
+→ Phase 2：mind_map → record markdown 写到 learning/dqv/_nlm/mind_map-default-dqv.md
+→ Gate 2：接受（用户在 NotebookLM 浏览了思维导图）
+→ Phase 3：video → record markdown 写到 learning/dqv/_nlm/video-default-dqv.md
+→ Gate 3：重生（用户嫌 prompt 不准） → 重生 → 接受
+→ Phase 4：slide_deck → record → 接受
+→ Phase 5：audio → record
+→ Phase 6：quiz + flashcards → 各一份 record（含 NotebookLM URL）
+→ 用户在 NotebookLM 在线做 quiz，错 5 题，粘贴错题
 → Phase 7：Mode D root cause → 3 题指向"边界不清"
 → Gate 7：重生 audio(structural)
 → 重做 Phase 5 → Phase 6 quiz 二轮 → Phase 7 二轮（错题降到 1 题）
 → Phase 8：Mode F 自检 → 仪表盘评级"熟悉"
 → Phase 9：Mode E 来源核查 → 通过率 80%
-→ Handoff：tag 加 learn-loop
+→ Handoff：tag 加 learn-loop；6 份 record markdown 进 git；无任何二进制本地副本
+```
+
+### 示例 1b：完整闭环 + 下载（--with-download）
+
+```
+用户：/mj-nlm:learn --with-download DQV
+→ 同示例 1，但每个 studio 子调度 mode=both
+→ Phase 2-6 各生成 record markdown（learning/dqv/_nlm/）+ 二进制（~/Downloads/nlm-archive/dqv/，不进 git）
+→ record markdown 的「变更历史」段附加本地路径
+→ Handoff：6 份 record + 6 份本地二进制
 ```
 
 ### 示例 2：--resume
@@ -452,3 +485,5 @@ learn 在每次 Gate 通过时写入 notebook tag：
 - **`→ ../mj-nlm-shared/learning-loop-templates.md`** — 各 Phase 调用 query/studio 时使用的 prompt 模板（§1 领域定向 / §2 三版 / §3 错题 / §4 案例机制 / §5 来源核查 / §6 术语 / §7 自检）
 - **`→ ../mj-nlm-shared/understanding-metrics.md`** — Phase 8 仪表盘 Note 模板
 - **`→ ../mj-nlm-shared/material-classification.md#多源类型分类`** — Phase 0 引导的 5 类来源对应表
+- **`→ ../mj-nlm-shared/artifact-metadata-template.md`** — **v2.1**：record markdown 模板（默认 mode 输出）
+- **`→ ../mj-nlm-studio/SKILL.md#Phase 4: Output Capture`** — 子调度 studio Phase 4 三模式行为

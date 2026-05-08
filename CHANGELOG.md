@@ -5,6 +5,43 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-05-08
+
+### Highlights
+
+mj-nlm v2.1 minor bump — Studio Phase 4 与 learn 编排默认输出形态从 download 改为 record（元信息 markdown），对齐 learning 子系统约束。download 路径保留为显式 opt-in，向后兼容。
+
+### Versions
+
+| Plugin | Version | 变更 |
+|---|---|---|
+| my-marketplace | **1.5.1 → 1.6.0** | mj-nlm minor bump |
+| **mj-nlm** | **2.0.1 → 2.1.0** | **minor bump**：默认 record mode + 元信息 markdown 模板 + learn --with-download / --download-only 标志 |
+| mp-git | 1.1.0 | 无变更 |
+| mp-dev | 1.0.0 | 无变更 |
+| flora-ptm | 1.0.0 | 无变更 |
+| mj-drawio | 0.1.0 | 无变更 |
+
+### Changed — mj-nlm v2.0.1 → v2.1.0
+
+- **studio Phase 4 三模式**：`--mode record`（默认）/ `--mode download`（opt-in）/ `--mode both`（学习+归档）；默认输出形态从二进制改为元信息 markdown
+- **learn 默认 record + 两个新标志**：`--with-download`（默认 record 之外同时下载）/ `--download-only`（跳过 record 仅下载，v2.0 兼容）
+- **新增共享模板** `mj-nlm-shared/artifact-metadata-template.md`：frontmatter schema + ≤ 50 行 body 范式 + 与 mj-system / mj-agent learning 子系统对齐说明
+- **shared 文件计数** 7 → 8
+
+详见 `plugins/mj-nlm/CHANGELOG.md#[2.1.0]`。
+
+### Breaking Changes（仅默认值层，不动 MCP 接口）
+
+- studio Phase 4 默认输出从 binary 改为 record markdown — v2.0 用户脚本若依赖 `nlm-artifacts/<file>.<ext>` 路径下的二进制，需显式加 `--mode download` 或迁到 `--mode both`
+- learn 默认走 record — v2.0 学习闭环用户的本地 mp3/mp4/pdf 不再自动产生；保留旧行为用 `--with-download`
+
+### Migration
+
+- 沿用 v2.0 行为：`/mj-nlm:studio --mode download` 或 `/mj-nlm:learn --download-only` / `--with-download`
+- 采纳 v2.1 默认：直接执行；按 H6 提示填 record 输出路径（mj-system / mj-agent 项目建议 `learning/<topic>/_nlm/`）
+- MCP 接口与现有 v2.0 已下载的文件路径不变
+
 ## [1.5.1] - 2026-05-06
 
 ### Highlights
