@@ -252,7 +252,7 @@ NodeType 判断（按 main.py 注册或 CLAUDE.md 中的 Active Services 表）�
 | **推荐** | `{service或agent全名}` | 涉及实体全名 | 如 `data-quality-validator`、`email-agent` |
 | **可选** | `{purpose}` | 用途 | 如 `培训`、`架构评审`、`知识沉淀`、**`学习`（v2）** |
 | **可选** | `{技术栈}` | 技术标签 | 如 `python`、`postgresql`、`fastapi`、**`langgraph`、`mcp`（v2）** |
-| **v2 新增** | `learn-loop` | 标记此 notebook 走过完整 /mj-nlm:learn 闭环 | 由 learn skill 自动添加 |
+| **v2 新增** | `learn-loop` | 标记此 notebook 走过完整学习闭环（v2.3 起：`/mj-nlm:learn-make` + `/mj-nlm:learn-test` 串联） | 由 wrapper skill 自动添加 |
 | **v2 新增** | `risk-class:{level}` | 风险等级（来自 risk-control-templates §3） | `high` / 默认无标 |
 
 ### 示例

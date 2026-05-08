@@ -407,7 +407,8 @@ record markdown: {record_path}（进 git）
 本地二进制: {output_path}（不进 git）
 
 下一步:
-  - 完整学习闭环 → /mj-nlm:learn
+  - 生成学习资料完整编排 → /mj-nlm:learn-make
+  - 生成考察资料完整编排 → /mj-nlm:learn-test
   - 继续生成其他制品 → /mj-nlm:studio
   - Quiz 错题 root cause / 来源核查 / 理解度自检 → /mj-nlm:query
   - 修订幻灯片（仅 slide_deck） → studio_revise

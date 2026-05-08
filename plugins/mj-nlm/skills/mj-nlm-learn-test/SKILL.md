@@ -27,7 +27,7 @@ description: >
 
 **v2.2 升级要点**：
 - 与 wrapper 1 `/mj-nlm:learn-make`（生成学习资料）对偶
-- 替代 v2.0/v2.1 `/mj-nlm:learn` 的下游考察编排（learn 已 deprecated）
+- 替代 v2.0/v2.1 `/mj-nlm:learn` 的下游考察编排（v2.3 已删除）
 - quiz / flashcards 走 studio record mode，进 git；用户在 NotebookLM 在线答题
 - 内部 100% 复用 studio / query 现有 Phase，不重写底层逻辑
 
@@ -386,6 +386,8 @@ Tag 自动添加: `learn-test-loop`
 
 ## Reference Files
 
+- **`→ ../mj-nlm-shared/preflight-checklist.md`** — Phase 0 三级 preflight（含 L3 notebook scope，v2.3 起；learn-test 总有 notebook_id 入参，强制 L3）
+- **`→ ../mj-nlm-shared/quota-estimation.md`** — wrapper 配额预告（v2.3 起；含 learn-test 默认 quiz+flashcards 锁定 + `--full` 全 5 类加成）
 - **`→ ../mj-nlm-shared/artifact-type-reference.md`** — quiz / flashcards 子参数详情
 - **`→ ../mj-nlm-shared/artifact-metadata-template.md`** — record markdown frontmatter schema（Phase 2a 输出范式）
 - **`→ ../mj-nlm-shared/learning-loop-templates.md#§3`** — 错题 root cause 提示词（Phase 2b 用）
@@ -396,4 +398,3 @@ Tag 自动添加: `learn-test-loop`
 - **`→ ../mj-nlm-studio/SKILL.md`** — Phase 2a 调度的子 skill
 - **`→ ../mj-nlm-query/SKILL.md`** — Phase 2b/2c/2d 调度的子 skill
 - **`→ ../mj-nlm-learn-make/SKILL.md`** — 配对的 wrapper 1（学习侧入口）
-- **`→ ../mj-nlm-learn/SKILL.md`** — v2.2 deprecated 的旧编排器（保留至 v2.3 删除）
